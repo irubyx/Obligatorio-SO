@@ -139,7 +139,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel5">
       <Properties>
-        <Property name="text" type="java.lang.String" value="RAM de la PC"/>
+        <Property name="text" type="java.lang.String" value="RAM de la PC:"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txtRAM">

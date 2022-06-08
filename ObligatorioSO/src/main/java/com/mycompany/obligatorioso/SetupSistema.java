@@ -26,11 +26,11 @@ public class SetupSistema {
         return instance;
     }
     
-    public void setValores(int pCantidadNucleos, int pTiempoCPU, int pCantidadRAM)
+    public void setValores(String pCantidadNucleos, String pTiempoCPU, String pCantidadRAM)
     {
-        this.cantidadNucleos = pCantidadNucleos;
-        this.tiempoCPU =pTiempoCPU;
-        this.cantidadRAM = pCantidadRAM;
+        this.cantidadNucleos = Integer.valueOf(pCantidadNucleos);
+        this.tiempoCPU =Integer.valueOf(pTiempoCPU);
+        this.cantidadRAM = Integer.valueOf(pCantidadRAM);
     }
     
     public int getCantidadNucleos()

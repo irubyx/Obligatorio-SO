@@ -61,7 +61,7 @@ public class Home extends javax.swing.JFrame {
             }
         });
 
-        jLabel5.setText("RAM de la PC");
+        jLabel5.setText("RAM de la PC:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -126,7 +126,7 @@ public class Home extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         SetupSistema singleton = SetupSistema.getInstance();
-        singleton.setValores(Integer.valueOf(this.txtCantNucleos.getText()), Integer.valueOf(this.txtTiempoCPU.getText()), Integer.valueOf(this.txtRAM.getText()));
+        singleton.setValores(this.txtCantNucleos.getText(),this.txtTiempoCPU.getText() ,this.txtRAM.getText());
         new Dashboard().setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed

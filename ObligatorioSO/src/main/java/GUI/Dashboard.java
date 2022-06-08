@@ -5,6 +5,8 @@
 package GUI;
 
 import com.mycompany.obligatorioso.SetupSistema;
+import com.mycompany.obligatorioso.*;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -12,11 +14,21 @@ import com.mycompany.obligatorioso.SetupSistema;
  */
 public class Dashboard extends javax.swing.JFrame {
 
+    public static Proceso[] procesosIniciales = cargarProcesosIniciales();
+    DefaultTableModel modeloProcesos;
+
     /**
      * Creates new form Dashboard
      */
     public Dashboard() {
         initComponents();
+        modeloProcesos = new DefaultTableModel();
+        modeloProcesos.addColumn("Nombre");
+        modeloProcesos.addColumn("Tiempo");
+        modeloProcesos.addColumn("Estado");
+        modeloProcesos.addColumn("RAM");
+        this.tablaProcesos.setModel(modeloProcesos);
+
     }
 
     /**
@@ -31,11 +43,12 @@ public class Dashboard extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        tablaProcesos = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         btnABM = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -57,18 +70,15 @@ public class Dashboard extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(jTable1);
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        tablaProcesos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        jScrollPane2.setViewportView(tablaProcesos);
 
         jLabel2.setText("Procesos");
 
@@ -83,6 +93,8 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        jButton2.setText("Desbloquear");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -96,19 +108,21 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(17, 17, 17)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnABM)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 164, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 159, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(24, 24, 24))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(84, Short.MAX_VALUE)
+                .addContainerGap(101, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jLabel3))
@@ -120,7 +134,8 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(btnABM))
-                .addGap(24, 24, 24))
+                .addGap(2, 2, 2)
+                .addComponent(jButton2))
         );
 
         pack();
@@ -128,11 +143,12 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
         SetupSistema singleton = SetupSistema.getInstance();
+        cargarTablaProcesos();
     }//GEN-LAST:event_formWindowActivated
 
     private void btnABMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnABMActionPerformed
         new ABMProcesos().setVisible(true);
-        
+
     }//GEN-LAST:event_btnABMActionPerformed
 
     /**
@@ -170,14 +186,31 @@ public class Dashboard extends javax.swing.JFrame {
         });
     }
 
+    private static Proceso[] cargarProcesosIniciales() {
+        Proceso[] procesos = new Proceso[3];
+        procesos[0] = new Proceso("System", Integer.MAX_VALUE, 0.1);
+        procesos[1] = new Proceso("Secure System", Integer.MAX_VALUE, 32);
+        procesos[2] = new Proceso("Registry", Integer.MAX_VALUE, 15);
+        return procesos;
+    }
+
+    private void cargarTablaProcesos() {
+        String [] texto = new String[4];
+        for(Proceso p : this.procesosIniciales)
+        {
+            String[0] = p
+        }
+        modeloProcesos.addRow(texto);
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnABM;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
+    private javax.swing.JTable tablaProcesos;
     // End of variables declaration//GEN-END:variables
 }

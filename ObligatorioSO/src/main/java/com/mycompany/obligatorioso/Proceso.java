@@ -21,8 +21,9 @@ public class Proceso {
     private boolean eliminado;
     private int id;
     private String estado;
+    private double ram;
 
-    public Proceso(String nombre,int tiempo) {
+    public Proceso(String nombre,int tiempo, double ram) {
         this.nombre = nombre;
         this.tiempo = tiempo;
         this.finalizado = false;
@@ -30,5 +31,6 @@ public class Proceso {
         this.tiempoRestante = tiempo;
         this.id = this.ids++;
         this.estado = "en espera";
+        this.ram = ram;
     }
 }
