@@ -4,12 +4,15 @@
  */
 package com.mycompany.obligatorioso;
 
+import java.util.LinkedList;
+
 /**
  *
  * @author SebaFripp
  */
 public class Proceso {
 
+    private static LinkedList<Proceso> procesos;
     private static int ids;
     private String nombre;
     private boolean finalizado;
