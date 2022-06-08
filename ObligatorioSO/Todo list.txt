@@ -1,0 +1,9 @@
+- Enumerado para los estados.
+- Posibilidad de bloquear y desbloquear.
+- Agregar procesos manualmente.
+- Eliminar procesos manualmente.
+- Prioridades.
+- Uso de CPU.
+- Reparticion del cpu entre los procesos.
+- Reparticion y validacion del uso del cpu para cada proceso.
+- Visualizacion de uso del cpu y ram.
