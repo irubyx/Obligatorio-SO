@@ -6,6 +6,7 @@ package GUI;
 
 import com.mycompany.obligatorioso.SetupSistema;
 import com.mycompany.obligatorioso.*;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -23,10 +24,10 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         initComponents();
         modeloProcesos = new DefaultTableModel();
+        modeloProcesos.addColumn("ID");
         modeloProcesos.addColumn("Nombre");
-        modeloProcesos.addColumn("Tiempo");
         modeloProcesos.addColumn("Estado");
-        modeloProcesos.addColumn("RAM");
+        modeloProcesos.addColumn("RAM (MB)");
         this.tablaProcesos.setModel(modeloProcesos);
 
     }
@@ -47,13 +48,17 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        btnABM = new javax.swing.JButton();
+        btnAgregar = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowActivated(java.awt.event.WindowEvent evt) {
                 formWindowActivated(evt);
+            }
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
             }
         });
 
@@ -86,43 +91,49 @@ public class Dashboard extends javax.swing.JFrame {
 
         jButton1.setText("Bloquear");
 
-        btnABM.setText("ABM");
-        btnABM.addActionListener(new java.awt.event.ActionListener() {
+        btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnABMActionPerformed(evt);
+                btnAgregarActionPerformed(evt);
             }
         });
 
         jButton2.setText("Desbloquear");
+
+        jButton3.setText("Eliminar");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(75, 75, 75)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel3)
-                .addGap(94, 94, 94))
-            .addGroup(layout.createSequentialGroup()
                 .addGap(17, 17, 17)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnABM)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnAgregar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(63, 63, 63)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 159, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24))
+                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(53, 53, 53)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel3)
+                        .addGap(70, 70, 70))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 85, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(101, Short.MAX_VALUE)
+                .addContainerGap(78, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jLabel3))
@@ -133,23 +144,35 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
-                    .addComponent(btnABM))
-                .addGap(2, 2, 2)
-                .addComponent(jButton2))
+                    .addComponent(btnAgregar))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton3)
+                    .addComponent(jButton2))
+                .addGap(39, 39, 39))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
-        SetupSistema singleton = SetupSistema.getInstance();
-        cargarTablaProcesos();
+
     }//GEN-LAST:event_formWindowActivated
 
-    private void btnABMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnABMActionPerformed
-        new ABMProcesos().setVisible(true);
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        new AgregarProceso().setVisible(true);
+        AgregarProcesos singleton = AgregarProcesos.getInstance();
+        while(singleton.getEstaCargado() == false)
+        {}
+        singleton.setEstaCargado();
+        //Se llenen los datos en la otra ventana
+        //meterlo en la tabla
+    }//GEN-LAST:event_btnAgregarActionPerformed
 
-    }//GEN-LAST:event_btnABMActionPerformed
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        SetupSistema singleton = SetupSistema.getInstance();
+        cargarTablaProcesos();
+    }//GEN-LAST:event_formWindowOpened
 
     /**
      * @param args the command line arguments
@@ -181,31 +204,46 @@ public class Dashboard extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Dashboard().setVisible(true);
+                Dashboard pantalla = new Dashboard();
+                pantalla.setVisible(true);
+                while(true)
+                {
+                    pantalla.actualizarPantalla();
+                }
             }
         });
     }
 
+    
+
+    public void actualizarPantalla() {
+        SwingUtilities.updateComponentTreeUI(this);
+        this.validateTree();
+    }
+
     private static Proceso[] cargarProcesosIniciales() {
         Proceso[] procesos = new Proceso[3];
-        procesos[0] = new Proceso("System", Integer.MAX_VALUE, 0.1);
-        procesos[1] = new Proceso("Secure System", Integer.MAX_VALUE, 32);
-        procesos[2] = new Proceso("Registry", Integer.MAX_VALUE, 15);
+        procesos[0] = new Proceso("System", Integer.MAX_VALUE);
+        procesos[1] = new Proceso("Secure System", Integer.MAX_VALUE);
+        procesos[2] = new Proceso("Registry", Integer.MAX_VALUE);
         return procesos;
     }
 
     private void cargarTablaProcesos() {
-        String [] texto = new String[4];
-        for(Proceso p : this.procesosIniciales)
-        {
-            String[0] = p
+        String[] texto = new String[4];
+        for (Proceso p : this.procesosIniciales) {
+            texto[0] = String.valueOf(p.getId());
+            texto[1] = String.valueOf(p.getNombre());
+            texto[2] = String.valueOf(p.getEstado());
+            texto[3] = String.valueOf(p.getRAM());
+            modeloProcesos.addRow(texto);
         }
-        modeloProcesos.addRow(texto);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnABM;
+    private javax.swing.JButton btnAgregar;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;

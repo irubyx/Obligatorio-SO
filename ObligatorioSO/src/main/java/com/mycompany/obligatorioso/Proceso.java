@@ -20,17 +20,42 @@ public class Proceso {
     private int tiempoRestante;
     private boolean eliminado;
     private int id;
-    private String estado;
+    private Estados estado;
     private double ram;
 
-    public Proceso(String nombre,int tiempo, double ram) {
+    public Proceso(String nombre, int tiempo) {
         this.nombre = nombre;
         this.tiempo = tiempo;
         this.finalizado = false;
         this.eliminado = false;
         this.tiempoRestante = tiempo;
         this.id = this.ids++;
-        this.estado = "en espera";
-        this.ram = ram;
+        this.estado = Estados.listo;
+        this.ram = 30;
     }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public String getNombre() {
+        return this.nombre;
+    }
+
+    public int getTiempo() {
+        return this.tiempo;
+    }
+
+    public int getTiempoRestante() {
+        return this.tiempo;
+    }
+
+    public Estados getEstado() {
+        return this.estado;
+    }
+
+    public double getRAM() {
+        return this.ram;
+    }
+
 }
