@@ -12,7 +12,7 @@ public class Scheduler {
 
     private final LinkedList<Process> readyQueue;
     private final LinkedList<Process> blockedProcesses;
-    private final Integer cores;
+    private final Process[] cores;
     private Hardware hardware;
     private final VirtualMemory virtualMemory;
     private final LinkedList<MemoryDescriptor> memoryDescriptors;
@@ -32,7 +32,7 @@ public class Scheduler {
         this.freePIDs = new LinkedList<>();
         this.readyQueue = new LinkedList<>();
         this.blockedProcesses = new LinkedList<>();
-        this.cores = hardware.GetCPUCoreCount();
+        this.cores = new Process[hardware.GetCPUCoreCount()];
         this.cycles = 0;
         this.running = false;
         for (int i = 0; i < MAX_PID; i++) {
@@ -85,7 +85,7 @@ public class Scheduler {
         return process;
     }
 
-    public void TerminateProcess(Process process) {
+    private void TerminateProcess(Process process) {
         if (!running)
             throw new IllegalStateException("Not running");
         if (process == null)
@@ -105,8 +105,103 @@ public class Scheduler {
         freePIDs.add(process.PID);
     }
 
+    public Process[] GetProcesses() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        Process[] runningProcesses = new Process[this.hardware.GetCPUCoreCount()];
+        for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
+            runningProcesses[i] = this.cores[i];
+        }
+        return runningProcesses;
+    }
+
+    public LinkedList<Process> GetReadyQueue() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        LinkedList<Process> readyQueueCopy = new LinkedList<>();
+        for (Process process : this.readyQueue) {
+            readyQueueCopy.add(process.deepCopy());
+        }
+
+        return readyQueueCopy;
+    }
+
+    public LinkedList<Process> GetBlockedProcesses() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        LinkedList<Process> blockedProcessesCopy = new LinkedList<>();
+        for (Process process : this.blockedProcesses) {
+            blockedProcessesCopy.add(process.deepCopy());
+        }
+
+        return blockedProcessesCopy;
+    }
+
+    public int GetMemoryUsage() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        return MemoryManager.GetMemoryUsage(this.memoryDescriptors);
+    }
+
+    public void RunProgram(Program program, int priority, Process parent) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+        if (program == null)
+            throw new IllegalArgumentException("Program cannot be null");
+
+        Process process = this.CreateProcess(program, priority, parent);
+        process.State = ProcessState.Ready;
+        this.readyQueue.add(process);
+    }
+
+    public void BlockProcess(int pid) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        
+        Process process = this.GetProcessByPID(pid);
+
+        if (process == null)
+            throw new IllegalArgumentException("Process cannot be null");
+        if (!processTable.contains(process))
+            throw new IllegalArgumentException("Process not found");
+        if (process.State == ProcessState.Finished)
+            throw new IllegalArgumentException("Process is already finished");
+        if (process.State == ProcessState.Blocked)
+            throw new IllegalArgumentException("Process is already blocked");
+
+        if (process.State == ProcessState.Ready) {
+            this.readyQueue.remove(process);
+        }
+
+        process.State = ProcessState.Blocked;
+        this.blockedProcesses.add(process);
+    }
+
+    public void TerminateProcess(int pid) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        Process process = this.GetProcessByPID(pid);
+        this.TerminateProcess(process);
+    }
+
     private void Schedule() {
         while (running) {
         }
+    }
+
+    private Process GetProcessByPID(int pid) {
+        for (Process process : this.processTable) {
+            if (process.PID == pid) {
+                return process;
+            }
+        }
+
+        return null;
     }
 }
