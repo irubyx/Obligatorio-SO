@@ -4,8 +4,7 @@
  */
 package GUI;
 
-import com.mycompany.obligatorioso.SetupSistema;
-import com.mycompany.obligatorioso.*;
+import com.mycompany.obligatoriosistemasoperativos.*;
 import java.util.LinkedList;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
