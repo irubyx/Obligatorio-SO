@@ -1,4 +1,4 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.obligatorioso.sched;
 
 public class Hardware {
     static int DEFAULT_CPU_CORE_COUNT = 4;

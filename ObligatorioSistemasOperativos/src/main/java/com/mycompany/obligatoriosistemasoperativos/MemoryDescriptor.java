@@ -1,4 +1,4 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.obligatorioso.sched;
 
 import java.util.LinkedList;
 

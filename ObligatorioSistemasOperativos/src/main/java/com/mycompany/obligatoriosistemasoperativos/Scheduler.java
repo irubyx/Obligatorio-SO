@@ -1,5 +1,6 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.obligatorioso.sched;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -12,7 +13,7 @@ public class Scheduler {
 
     private final LinkedList<Process> readyQueue;
     private final LinkedList<Process> blockedProcesses;
-    private final Integer cores;
+    private final Process[] cores;
     private Hardware hardware;
     private final VirtualMemory virtualMemory;
     private final LinkedList<MemoryDescriptor> memoryDescriptors;
@@ -32,7 +33,7 @@ public class Scheduler {
         this.freePIDs = new LinkedList<>();
         this.readyQueue = new LinkedList<>();
         this.blockedProcesses = new LinkedList<>();
-        this.cores = hardware.GetCPUCoreCount();
+        this.cores = new Process[hardware.GetCPUCoreCount()];
         this.cycles = 0;
         this.running = false;
         for (int i = 0; i < MAX_PID; i++) {
@@ -49,10 +50,10 @@ public class Scheduler {
         running = true;
 
         Program initialProgram = new Program("init", 0, 0, 0, 1024);
-        Process init = this.CreateProcess(initialProgram, 1, null);
-
-
+        Process process = this.CreateProcess(initialProgram, 10, null);
+        this.AddProcessToReadyQueue(process);
         
+        executorService.submit(this::Schedule);
     }
 
     public void Stop() {
@@ -64,7 +65,7 @@ public class Scheduler {
         executorService.shutdownNow();
     }
 
-    public Process CreateProcess(Program program, int priority, Process parent) {
+    private Process CreateProcess(Program program, int priority, Process parent) {
         if (!running)
             throw new IllegalStateException("Not running");
         if (program == null)
@@ -85,7 +86,7 @@ public class Scheduler {
         return process;
     }
 
-    public void TerminateProcess(Process process) {
+    private void TerminateProcess(Process process) {
         if (!running)
             throw new IllegalStateException("Not running");
         if (process == null)
@@ -105,8 +106,128 @@ public class Scheduler {
         freePIDs.add(process.PID);
     }
 
+    public Process[] GetProcesses() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        Process[] runningProcesses = new Process[this.hardware.GetCPUCoreCount()];
+        for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
+            runningProcesses[i] = this.cores[i];
+        }
+        return runningProcesses;
+    }
+
+    public LinkedList<Process> GetReadyQueue() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        LinkedList<Process> readyQueueCopy = new LinkedList<>();
+        for (Process process : this.readyQueue) {
+            readyQueueCopy.add(process.deepCopy());
+        }
+
+        return readyQueueCopy;
+    }
+
+    public LinkedList<Process> GetBlockedProcesses() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        LinkedList<Process> blockedProcessesCopy = new LinkedList<>();
+        for (Process process : this.blockedProcesses) {
+            blockedProcessesCopy.add(process.deepCopy());
+        }
+
+        return blockedProcessesCopy;
+    }
+
+    public int GetMemoryUsage() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        return MemoryManager.GetMemoryUsage(this.memoryDescriptors);
+    }
+
+    public void RunProgram(Program program, int priority, Process parent) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+        if (program == null)
+            throw new IllegalArgumentException("Program cannot be null");
+        if (priority < 1 || priority > 99)
+            throw new IllegalArgumentException("Priority must be between 1 and 99");
+        if (parent != null && processTable.size() == 0 && !processTable.contains(parent))
+            throw new IllegalArgumentException("Parent process not found");
+        if (parent == null && processTable.size() > 0)
+            throw new IllegalArgumentException("Parent process can only be null if there are no processes");
+
+        Process process = this.CreateProcess(program, priority, parent);
+        this.AddProcessToReadyQueue(process);
+    }
+
+    public void BlockProcess(int pid) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        
+        Process process = this.GetProcessByPID(pid);
+
+        if (process == null)
+            throw new IllegalArgumentException("Process cannot be null");
+        if (!processTable.contains(process))
+            throw new IllegalArgumentException("Process not found");
+        if (process.State == ProcessState.Finished)
+            throw new IllegalArgumentException("Process is already finished");
+        if (process.State == ProcessState.Blocked)
+            throw new IllegalArgumentException("Process is already blocked");
+
+        if (process.State == ProcessState.Ready) {
+            this.readyQueue.remove(process);
+        }
+
+        process.State = ProcessState.Blocked;
+        this.blockedProcesses.add(process);
+    }
+
+    public void TerminateProcess(int pid) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        Process process = this.GetProcessByPID(pid);
+        this.TerminateProcess(process);
+    }
+
     private void Schedule() {
         while (running) {
+        }
+    }
+
+    private Process GetProcessByPID(int pid) {
+        for (Process process : this.processTable) {
+            if (process.PID == pid) {
+                return process;
+            }
+        }
+
+        return null;
+    }
+
+    private void AddProcessToReadyQueue(Process process) {
+        if (process == null)
+            throw new IllegalArgumentException("Process cannot be null");
+
+        process.State = ProcessState.Ready;
+
+        if (this.readyQueue.size() == 0) {
+            this.readyQueue.add(process);
+        } else {
+            for (int i = 0; i < this.readyQueue.size(); i++) {
+                if (process.Priority > this.readyQueue.get(i).Priority) {
+                    this.readyQueue.add(i, process);
+                    return;
+                }
+            }
+
+            this.readyQueue.add(process);
         }
     }
 }

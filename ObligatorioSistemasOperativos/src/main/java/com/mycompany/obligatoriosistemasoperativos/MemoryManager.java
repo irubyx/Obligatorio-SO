@@ -1,4 +1,4 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.obligatorioso.sched;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -81,5 +81,20 @@ public class MemoryManager {
 
     public static void ReleaseFrame(VirtualMemory memory, int frame) {
         memory.FreeFrames.add(frame);
+    }
+
+    public static int GetMemoryUsage(LinkedList<MemoryDescriptor> descriptors) {
+        int memoryUsage = 0;
+        for (MemoryDescriptor descriptor : descriptors) {
+            for (int i = 0; i < 1024; i++) {
+                for (int j = 0; j < 1024; j++) {
+                    if (descriptor.PageTable[i][j].Valid) {
+                        memoryUsage += 0x1000;
+                    }
+                }
+            }
+        }
+
+        return memoryUsage;
     }
 }

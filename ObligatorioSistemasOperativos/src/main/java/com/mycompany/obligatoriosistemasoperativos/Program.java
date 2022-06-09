@@ -1,4 +1,4 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.obligatorioso.sched;
 
 public class Program {
     public final int ExecutionTimeMS;
