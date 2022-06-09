@@ -1,4 +1,4 @@
-package com.mycompany.obligatorioso.sched;
+package com.mycompany.obligatoriosistemasoperativos;
 
 public enum ProcessState {
     New,
