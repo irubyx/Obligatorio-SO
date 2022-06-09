@@ -6,6 +6,7 @@ package GUI;
 
 import com.mycompany.obligatorioso.SetupSistema;
 import com.mycompany.obligatorioso.*;
+import java.util.LinkedList;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
@@ -15,7 +16,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class Dashboard extends javax.swing.JFrame {
 
-    public static Proceso[] procesosIniciales = cargarProcesosIniciales();
+    public static Proceso[] procesosIniciales = inicializarProcesosIniciales();
     DefaultTableModel modeloProcesos;
 
     /**
@@ -162,16 +163,17 @@ public class Dashboard extends javax.swing.JFrame {
     private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
         new AgregarProceso().setVisible(true);
         AgregarProcesos singleton = AgregarProcesos.getInstance();
-        while(singleton.getEstaCargado() == false)
-        {}
+        //Queda en loop infinito. Arreglar esto
+        while (singleton.getEstaCargado() == false) {
+        }
         singleton.setEstaCargado();
-        //Se llenen los datos en la otra ventana
-        //meterlo en la tabla
+        Proceso proceso = new Proceso(singleton.getNombre(), singleton.getTiempoCPU());
+        this.cargarProcesoATabla(proceso);
     }//GEN-LAST:event_btnAgregarActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         SetupSistema singleton = SetupSistema.getInstance();
-        cargarTablaProcesos();
+        cargarProcesosIniciales();
     }//GEN-LAST:event_formWindowOpened
 
     /**
@@ -206,22 +208,19 @@ public class Dashboard extends javax.swing.JFrame {
             public void run() {
                 Dashboard pantalla = new Dashboard();
                 pantalla.setVisible(true);
-                while(true)
-                {
+                while (true) {
                     pantalla.actualizarPantalla();
                 }
             }
         });
     }
 
-    
-
     public void actualizarPantalla() {
         SwingUtilities.updateComponentTreeUI(this);
         this.validateTree();
     }
 
-    private static Proceso[] cargarProcesosIniciales() {
+    private static Proceso[] inicializarProcesosIniciales() {
         Proceso[] procesos = new Proceso[3];
         procesos[0] = new Proceso("System", Integer.MAX_VALUE);
         procesos[1] = new Proceso("Secure System", Integer.MAX_VALUE);
@@ -229,14 +228,85 @@ public class Dashboard extends javax.swing.JFrame {
         return procesos;
     }
 
-    private void cargarTablaProcesos() {
+    private void cargarProcesoATabla(Proceso p) {
         String[] texto = new String[4];
-        for (Proceso p : this.procesosIniciales) {
             texto[0] = String.valueOf(p.getId());
             texto[1] = String.valueOf(p.getNombre());
             texto[2] = String.valueOf(p.getEstado());
             texto[3] = String.valueOf(p.getRAM());
             modeloProcesos.addRow(texto);
+
+    }
+
+    private void cargarProcesosIniciales() {
+        for (Proceso p : this.procesosIniciales) {
+            this.cargarProcesoATabla(p);
+        }
+    }
+
+    public static void repartirCPU(LinkedList<Proceso> procesos, LinkedList<Nucleo> nucleos) {
+        int cantProcesos = procesos.size();
+        int cantNucleos = nucleos.size();
+        int r;
+
+        LinkedList numerosP = new LinkedList();
+        int largoNumP = numerosP.size();
+        for (int i = 0; i < cantProcesos; i++) {
+            if (procesos.get(i).getEstado().equals(Estados.listo)) {
+                numerosP.add(i);
+            }
+        }
+        LinkedList numerosN = new LinkedList();
+        int largoNumN = numerosN.size();
+        for (int i = 0; i < cantProcesos; i++) {
+            numerosN.add(i);
+        }
+
+        if (cantProcesos == 0 || cantNucleos == 0) {
+            return;
+        }
+
+        Proceso p;
+        Nucleo n;
+        int indice;
+        if (cantProcesos <= cantNucleos) {
+            for (int i = 0; i < cantProcesos; i++) {
+                // Obtengo proceso
+                r = (int) (Math.random() * largoNumP - 1);
+                indice = (int) numerosP.get(r);
+                p = procesos.get(indice);
+                numerosP.remove(r);
+
+                // Obtengo nucleo
+                r = (int) (Math.random() * largoNumN - 1);
+                indice = (int) numerosN.get(r);
+                n = nucleos.get(indice);
+                numerosN.remove(r);
+
+                // Seteo proceso al nucleo
+                n.setProcesoAsociado(p);
+            }
+            return;
+        }
+
+        if (cantProcesos > cantNucleos) {
+            for (int i = 0; i < cantNucleos; i++) {
+                // Obtengo proceso
+                r = (int) (Math.random() * largoNumP - 1);
+                indice = (int) numerosP.get(r);
+                p = procesos.get(indice);
+                numerosP.remove(r);
+
+                // Obtengo nucleo
+                r = (int) (Math.random() * largoNumN - 1);
+                indice = (int) numerosN.get(r);
+                n = nucleos.get(indice);
+                numerosN.remove(r);
+
+                // Seteo proceso al nucleo
+                n.setProcesoAsociado(p);
+            }
+            return;
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables

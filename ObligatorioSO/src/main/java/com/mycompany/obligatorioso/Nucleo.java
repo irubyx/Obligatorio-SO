@@ -12,13 +12,24 @@ public class Nucleo {
     private static int genIds;
     private int id;
     private int capComputo;
+    private Proceso procesoAsociado;
     
     public Nucleo(int capComputo){
         this.capComputo = capComputo;
         this.setId(this.genIds++);
     }
 
-    private void setId(int id){
+    public void setId(int id){
         this.id = id;
+    }
+    
+    public void setProcesoAsociado(Proceso pProcesoAsociado)
+    {
+        this.procesoAsociado = pProcesoAsociado;
+    }
+    
+    public Proceso getProcesoAsociado()
+    {
+        return this.procesoAsociado;
     }
 }
