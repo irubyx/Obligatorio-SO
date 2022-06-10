@@ -10,9 +10,9 @@ package com.mycompany.obligatoriosistemasoperativos;
  */
 public class AddProcess {
     private static AddProcess instance;
-    private String nombre = "";
-    private int tiempoCPU = 0;
-    private boolean estaCargado = false;
+    private String name = "";
+    private int CPU_time = 0;
+    private boolean isLoaded = false;
     
     private AddProcess()
     {}
@@ -26,32 +26,32 @@ public class AddProcess {
         return instance;
     }
     
-    public void setValores(String pNombre, String pTiempoCPU)
+    public void setValues(String pName, String pCPU_time)
     {
-        this.nombre = pNombre;
-        this.tiempoCPU =Integer.valueOf(pTiempoCPU);
-        this.estaCargado = true;
+        this.name = pName;
+        this.CPU_time =Integer.valueOf(pCPU_time);
+        this.isLoaded = true;
     }
     
-    public String getNombre()
+    public String getName()
     {
-        return this.nombre;
+        return this.name;
     }
     
     
-    public int getTiempoCPU()
+    public int getCPUTime()
     {
-        return this.tiempoCPU;
+        return this.CPU_time;
     }
     
-    public boolean getEstaCargado()
+    public boolean getIsLoaded()
     {
-        return this.estaCargado;
+        return this.isLoaded;
     }
     
-    public void setEstaCargado()
+    public void setIsLoaded()
     {
-        this.estaCargado= true;
+        this.isLoaded = true;
     }
 
 }
