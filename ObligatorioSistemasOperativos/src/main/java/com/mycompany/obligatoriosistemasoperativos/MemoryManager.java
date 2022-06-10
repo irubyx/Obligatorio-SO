@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class MemoryManager {
-    public static void NewProcessArea(Process process, int size) {
+    public static void NewProcessArea(PCB process, int size) {
         MemoryDescriptor memory = process.Memory;
 
         int startAddress = 0x0;
@@ -24,7 +24,7 @@ public class MemoryManager {
         memory.Areas.add(new MemoryArea(startAddress, startAddress + size, memory));
     }
 
-    public static void FreeProcessMemory(VirtualMemory vm, Process process) {
+    public static void FreeProcessMemory(VirtualMemory vm, PCB process) {
         MemoryDescriptor memory = process.Memory;
         LinkedList<PageTableEntry> pages = new LinkedList<PageTableEntry>();
         for (MemoryArea memoryArea : memory.Areas) {
@@ -39,13 +39,13 @@ public class MemoryManager {
         }
     }
 
-    public static PageTableEntry GetPage(Process process, int address) {
+    public static PageTableEntry GetPage(PCB process, int address) {
         int directory = (address & 0xFFC00000) >> 22;
         int table = (address & 0x3FF000) >> 12;
         return process.Memory.PageTable[directory][table];
     }
 
-    public static LinkedList<PageTableEntry> GetAreaRequiredPages(Process process, MemoryArea area) {
+    public static LinkedList<PageTableEntry> GetAreaRequiredPages(PCB process, MemoryArea area) {
         LinkedList<PageTableEntry> pages = new LinkedList<PageTableEntry>();
         for (int i = area.StartAddress; i < area.EndAddress; i += 0x1000) {
             pages.add(MemoryManager.GetPage(process, i));
@@ -53,7 +53,7 @@ public class MemoryManager {
         return pages;
     }
 
-    public static void AccessPages(Process process) {
+    public static void AccessPages(PCB process) {
         LinkedList<PageTableEntry> pages = new LinkedList<PageTableEntry>();
         for (MemoryArea memoryArea : process.Memory.Areas) {
             pages.addAll(MemoryManager.GetAreaRequiredPages(process, memoryArea));
@@ -63,7 +63,7 @@ public class MemoryManager {
         }
     }
     
-    public static void ClearAccessesCounters(Process process) {
+    public static void ClearAccessesCounters(PCB process) {
         for (int i = 0; i < 1024; i++) {
             for (int j = 0; j < 1024; j++) {
                 process.Memory.PageTable[i][j].ResetAccess();;

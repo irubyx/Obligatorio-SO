@@ -7,11 +7,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-public class Process implements Serializable {
+public class PCB implements Serializable {
     public final int PID;
-    public final Process Parent;
+    public final PCB Parent;
     public final ProcessContext Context;
-    public final LinkedList<Process> Children;
+    public final LinkedList<PCB> Children;
     public final Program Program;
     public final MemoryDescriptor Memory;
     public final SchedulingData SchedulingData;
@@ -19,7 +19,7 @@ public class Process implements Serializable {
     public ProcessState State;
     public int Priority;
 
-    public Process(int pid, Process parent, Program program) {
+    public PCB(int pid, PCB parent, Program program) {
         this.PID = pid;
         this.Parent = parent;
         this.Context = new ProcessContext();
@@ -31,21 +31,21 @@ public class Process implements Serializable {
         this.SchedulingData = new SchedulingData();
     }
 
-    public void AddChild(Process child) {
+    public void AddChild(PCB child) {
         if (this.Children.contains(child))
             throw new IllegalStateException("Child already added");
 
         this.Children.add(child);
     }
 
-    public void RemoveChild(Process child) {
+    public void RemoveChild(PCB child) {
         if (!this.Children.contains(child))
             throw new IllegalStateException("Child not found");
 
         this.Children.remove(child);
     }
 
-    public Process deepCopy() {
+    public PCB deepCopy() {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -54,7 +54,7 @@ public class Process implements Serializable {
 
             ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
             ObjectInputStream ois = new ObjectInputStream(bais);
-            Process copy = (Process) ois.readObject();
+            PCB copy = (PCB) ois.readObject();
             ois.close();
 
             return copy;

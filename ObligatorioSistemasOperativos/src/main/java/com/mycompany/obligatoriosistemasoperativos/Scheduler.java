@@ -1,6 +1,5 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -11,13 +10,13 @@ public class Scheduler {
     static final double DEFAULT_QUANTUM_MS = 100;
     static final double NRU_MS_INTERVAL = 100;
 
-    private final LinkedList<Process> readyQueue;
-    private final LinkedList<Process> blockedProcesses;
-    private final Process[] cores;
+    private final LinkedList<PCB> readyQueue;
+    private final LinkedList<PCB> blockedProcesses;
+    private final PCB[] cores;
     private Hardware hardware;
     private final VirtualMemory virtualMemory;
     private final LinkedList<MemoryDescriptor> memoryDescriptors;
-    private final LinkedList<Process> processTable;
+    private final LinkedList<PCB> processTable;
     private final Queue<Integer> freePIDs;
     private final ExecutorService executorService;
     private long cycles;
@@ -33,7 +32,7 @@ public class Scheduler {
         this.freePIDs = new LinkedList<>();
         this.readyQueue = new LinkedList<>();
         this.blockedProcesses = new LinkedList<>();
-        this.cores = new Process[hardware.GetCPUCoreCount()];
+        this.cores = new PCB[hardware.GetCPUCoreCount()];
         this.cycles = 0;
         this.running = false;
         for (int i = 0; i < MAX_PID; i++) {
@@ -50,7 +49,7 @@ public class Scheduler {
         running = true;
 
         Program initialProgram = new Program("init", 0, 0, 0, 1024);
-        Process process = this.CreateProcess(initialProgram, 10, null);
+        PCB process = this.CreateProcess(initialProgram, 10, null);
         this.AddProcessToReadyQueue(process);
         
         executorService.submit(this::Schedule);
@@ -65,7 +64,7 @@ public class Scheduler {
         executorService.shutdownNow();
     }
 
-    private Process CreateProcess(Program program, int priority, Process parent) {
+    private PCB CreateProcess(Program program, int priority, PCB parent) {
         if (!running)
             throw new IllegalStateException("Not running");
         if (program == null)
@@ -78,7 +77,7 @@ public class Scheduler {
             throw new IllegalArgumentException("Parent process can only be null if there are no processes");
 
         int pid = freePIDs.remove();
-        Process process = new Process(pid, parent, program);
+        PCB process = new PCB(pid, parent, program);
         process.Priority = priority;
         process.State = ProcessState.New;
         MemoryManager.NewProcessArea(process, program.RequiredMemoryB);
@@ -86,7 +85,7 @@ public class Scheduler {
         return process;
     }
 
-    private void TerminateProcess(Process process) {
+    private void TerminateProcess(PCB process) {
         if (!running)
             throw new IllegalStateException("Not running");
         if (process == null)
@@ -106,35 +105,35 @@ public class Scheduler {
         freePIDs.add(process.PID);
     }
 
-    public Process[] GetProcesses() {
+    public PCB[] GetProcesses() {
         if (!running)
             throw new IllegalStateException("Not running");
 
-        Process[] runningProcesses = new Process[this.hardware.GetCPUCoreCount()];
+        PCB[] runningProcesses = new PCB[this.hardware.GetCPUCoreCount()];
         for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
             runningProcesses[i] = this.cores[i];
         }
         return runningProcesses;
     }
 
-    public LinkedList<Process> GetReadyQueue() {
+    public LinkedList<PCB> GetReadyQueue() {
         if (!running)
             throw new IllegalStateException("Not running");
 
-        LinkedList<Process> readyQueueCopy = new LinkedList<>();
-        for (Process process : this.readyQueue) {
+        LinkedList<PCB> readyQueueCopy = new LinkedList<>();
+        for (PCB process : this.readyQueue) {
             readyQueueCopy.add(process.deepCopy());
         }
 
         return readyQueueCopy;
     }
 
-    public LinkedList<Process> GetBlockedProcesses() {
+    public LinkedList<PCB> GetBlockedProcesses() {
         if (!running)
             throw new IllegalStateException("Not running");
 
-        LinkedList<Process> blockedProcessesCopy = new LinkedList<>();
-        for (Process process : this.blockedProcesses) {
+        LinkedList<PCB> blockedProcessesCopy = new LinkedList<>();
+        for (PCB process : this.blockedProcesses) {
             blockedProcessesCopy.add(process.deepCopy());
         }
 
@@ -148,19 +147,22 @@ public class Scheduler {
         return MemoryManager.GetMemoryUsage(this.memoryDescriptors);
     }
 
-    public void RunProgram(Program program, int priority, Process parent) {
+    public void RunProgram(Program program, int priority, int parentPID) {
         if (!running)
             throw new IllegalStateException("Not running");
         if (program == null)
             throw new IllegalArgumentException("Program cannot be null");
         if (priority < 1 || priority > 99)
             throw new IllegalArgumentException("Priority must be between 1 and 99");
+
+        PCB parent = this.GetProcessByPID(parentPID);
+
         if (parent != null && processTable.size() == 0 && !processTable.contains(parent))
             throw new IllegalArgumentException("Parent process not found");
         if (parent == null && processTable.size() > 0)
             throw new IllegalArgumentException("Parent process can only be null if there are no processes");
 
-        Process process = this.CreateProcess(program, priority, parent);
+        PCB process = this.CreateProcess(program, priority, parent);
         this.AddProcessToReadyQueue(process);
     }
 
@@ -169,7 +171,7 @@ public class Scheduler {
             throw new IllegalStateException("Not running");
 
         
-        Process process = this.GetProcessByPID(pid);
+        PCB process = this.GetProcessByPID(pid);
 
         if (process == null)
             throw new IllegalArgumentException("Process cannot be null");
@@ -192,7 +194,7 @@ public class Scheduler {
         if (!running)
             throw new IllegalStateException("Not running");
 
-        Process process = this.GetProcessByPID(pid);
+        PCB process = this.GetProcessByPID(pid);
         this.TerminateProcess(process);
     }
 
@@ -201,8 +203,8 @@ public class Scheduler {
         }
     }
 
-    private Process GetProcessByPID(int pid) {
-        for (Process process : this.processTable) {
+    private PCB GetProcessByPID(int pid) {
+        for (PCB process : this.processTable) {
             if (process.PID == pid) {
                 return process;
             }
@@ -211,7 +213,7 @@ public class Scheduler {
         return null;
     }
 
-    private void AddProcessToReadyQueue(Process process) {
+    private void AddProcessToReadyQueue(PCB process) {
         if (process == null)
             throw new IllegalArgumentException("Process cannot be null");
 
