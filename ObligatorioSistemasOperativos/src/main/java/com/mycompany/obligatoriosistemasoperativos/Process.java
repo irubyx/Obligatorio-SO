@@ -1,8 +1,13 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class Process {
+public class Process implements Serializable {
     public final int PID;
     public final Process Parent;
     public final ProcessContext Context;
@@ -38,5 +43,23 @@ public class Process {
             throw new IllegalStateException("Child not found");
 
         this.Children.remove(child);
+    }
+
+    public Process deepCopy() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(this);
+            oos.close();
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Process copy = (Process) ois.readObject();
+            ois.close();
+
+            return copy;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
