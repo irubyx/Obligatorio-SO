@@ -6,6 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Scheduler {
+    private static Scheduler instance;
+
     static final int MAX_PID = 1000;
     static final double DEFAULT_QUANTUM_MS = 100;
     static final double NRU_MS_INTERVAL = 100;
@@ -23,7 +25,7 @@ public class Scheduler {
 
     private boolean running;
 
-    public Scheduler(Hardware hardware) {
+    private Scheduler(Hardware hardware) {
         executorService = Executors.newSingleThreadExecutor();
         this.hardware = hardware;
         this.virtualMemory = new VirtualMemory(hardware.GetRAMSize());
@@ -38,6 +40,13 @@ public class Scheduler {
         for (int i = 0; i < MAX_PID; i++) {
             freePIDs.add(i);
         }
+    }
+
+    public static Scheduler GetInstance(Hardware hardware) {
+        if (instance == null) {
+            instance = new Scheduler(hardware);
+        }
+        return instance;
     }
 
     public void Start() {
