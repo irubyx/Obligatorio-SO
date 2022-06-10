@@ -120,7 +120,7 @@ public class Scheduler {
 
         PCB[] runningProcesses = new PCB[this.hardware.GetCPUCoreCount()];
         for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
-            runningProcesses[i] = this.cores[i];
+            runningProcesses[i] = this.cores[i].deepCopy();
         }
         return runningProcesses;
     }
