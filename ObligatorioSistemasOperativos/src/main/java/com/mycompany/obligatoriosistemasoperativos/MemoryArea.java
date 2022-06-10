@@ -1,12 +1,12 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
 public class MemoryArea {
-    public final MemoryDescriptor Owner;
-    public final int Size;
-    public final int StartAddress;
-    public final int EndAddress;
+    final MemoryDescriptor Owner;
+    final int Size;
+    final int StartAddress;
+    final int EndAddress;
 
-    public MemoryArea(int startAddress, int endAddress, MemoryDescriptor owner) {
+    MemoryArea(int startAddress, int endAddress, MemoryDescriptor owner) {
         this.StartAddress = startAddress;
         this.EndAddress = endAddress;
         this.Owner = owner;

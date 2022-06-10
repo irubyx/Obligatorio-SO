@@ -16,10 +16,10 @@ public class PCB implements Serializable {
     public final MemoryDescriptor Memory;
     public final SchedulingData SchedulingData;
     
-    public ProcessState State;
-    public int Priority;
+    ProcessState State;
+    int Priority;
 
-    public PCB(int pid, PCB parent, Program program) {
+    PCB(int pid, PCB parent, Program program) {
         this.PID = pid;
         this.Parent = parent;
         this.Context = new ProcessContext();
@@ -31,21 +31,21 @@ public class PCB implements Serializable {
         this.SchedulingData = new SchedulingData();
     }
 
-    public void AddChild(PCB child) {
+    void AddChild(PCB child) {
         if (this.Children.contains(child))
             throw new IllegalStateException("Child already added");
 
         this.Children.add(child);
     }
 
-    public void RemoveChild(PCB child) {
+    void RemoveChild(PCB child) {
         if (!this.Children.contains(child))
             throw new IllegalStateException("Child not found");
 
         this.Children.remove(child);
     }
 
-    public PCB deepCopy() {
+    PCB deepCopy() {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -61,5 +61,13 @@ public class PCB implements Serializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ProcessState GetState() {
+        return this.State;
+    }
+
+    public int GetPriority() {
+        return this.Priority;
     }
 }

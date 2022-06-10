@@ -3,10 +3,10 @@ package com.mycompany.obligatoriosistemasoperativos;
 import java.util.LinkedList;
 
 public class MemoryDescriptor {
-    public LinkedList<MemoryArea> Areas;
-    public final PageTableEntry[][] PageTable;
+    LinkedList<MemoryArea> Areas;
+    final PageTableEntry[][] PageTable;
 
-    public MemoryDescriptor() {
+    MemoryDescriptor() {
         PageTable = new PageTableEntry[1024][1024];
         Areas = new LinkedList<MemoryArea>();
         for (int i = 0; i < 1024; i++) {

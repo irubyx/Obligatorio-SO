@@ -6,12 +6,13 @@ public class VirtualMemory {
     static final int DEFAULT_FRAME_SIZE = 4096;
 
     public final LinkedList<Integer> FreeFrames;
-    public int FrameSize;
-    public int FrameCount;
-    public int PageSize;
-    public long PageCount;
-    public long VMSize;
-    public long RAMSize;
+    
+    int FrameSize;
+    int FrameCount;
+    int PageSize;
+    long PageCount;
+    long VMSize;
+    long RAMSize;
 
     public VirtualMemory(int ramSize) {
         this.RAMSize = ramSize;
@@ -24,5 +25,29 @@ public class VirtualMemory {
         for (int i = 0; i < this.FrameCount; i++) {
             FreeFrames.add(i);
         }
+    }
+
+    public int GetFrameSize() {
+        return this.FrameSize;
+    }
+    
+    public long GetFrameCount() {
+        return this.FrameCount;
+    }
+
+    public long GetPageSize() {
+        return this.PageSize;
+    }
+
+    public long GetPageCount() {
+        return this.PageCount;
+    }
+
+    public long GetVMSize() {
+        return this.VMSize;
+    }
+
+    public long GetRAMSize() {
+        return this.RAMSize;
     }
 }

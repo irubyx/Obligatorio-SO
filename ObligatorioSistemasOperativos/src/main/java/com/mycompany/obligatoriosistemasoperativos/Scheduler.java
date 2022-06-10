@@ -207,6 +207,23 @@ public class Scheduler {
         this.TerminateProcess(process);
     }
 
+    public void UnblockProcess(int pid) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        PCB process = this.GetProcessByPID(pid);
+
+        if (process == null)
+            throw new IllegalArgumentException("Process cannot be null");
+        if (!processTable.contains(process))
+            throw new IllegalArgumentException("Process not found");
+        if (!this.blockedProcesses.contains(process))
+            throw new IllegalArgumentException("Process is not blocked");
+
+        this.blockedProcesses.remove(process);
+        this.AddProcessToReadyQueue(process);
+    }
+
     private void Schedule() {
         while (running) {
         }

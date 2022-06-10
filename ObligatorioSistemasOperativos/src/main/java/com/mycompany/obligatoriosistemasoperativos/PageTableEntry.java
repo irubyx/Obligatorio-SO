@@ -3,29 +3,36 @@ package com.mycompany.obligatoriosistemasoperativos;
 public class PageTableEntry {
     public final int StartAddress;
 
-    public boolean Valid;
-    public int FrameNumber;
+    boolean Valid;
+    int FrameNumber;
 
     private int accesses;
 
-    public PageTableEntry(int startAddress) {
+    PageTableEntry(int startAddress) {
         this.StartAddress = startAddress;
         Valid = false;
         FrameNumber = 0;
         accesses = 0;
     }
 
-    public void Access() {
+    void Access() {
         if (accesses < 2)
             accesses++;
     }
 
-    public void ResetAccess() {
+    void ResetAccess() {
         accesses = 0;
     }
 
     public int GetAccesses() {
         return accesses;
-    }	
-    
+    }
+
+    public boolean IsValid() {
+        return Valid;
+    }
+
+    public int GetFrameNumber() {
+        return FrameNumber;
+    }
 }

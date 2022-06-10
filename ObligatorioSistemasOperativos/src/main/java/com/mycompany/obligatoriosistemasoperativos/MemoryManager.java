@@ -3,8 +3,8 @@ package com.mycompany.obligatoriosistemasoperativos;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class MemoryManager {
-    public static void NewProcessArea(PCB process, int size) {
+class MemoryManager {
+    static void NewProcessArea(PCB process, int size) {
         MemoryDescriptor memory = process.Memory;
 
         int startAddress = 0x0;
@@ -24,7 +24,7 @@ public class MemoryManager {
         memory.Areas.add(new MemoryArea(startAddress, startAddress + size, memory));
     }
 
-    public static void FreeProcessMemory(VirtualMemory vm, PCB process) {
+    static void FreeProcessMemory(VirtualMemory vm, PCB process) {
         MemoryDescriptor memory = process.Memory;
         LinkedList<PageTableEntry> pages = new LinkedList<PageTableEntry>();
         for (MemoryArea memoryArea : memory.Areas) {
@@ -39,13 +39,13 @@ public class MemoryManager {
         }
     }
 
-    public static PageTableEntry GetPage(PCB process, int address) {
+    static PageTableEntry GetPage(PCB process, int address) {
         int directory = (address & 0xFFC00000) >> 22;
         int table = (address & 0x3FF000) >> 12;
         return process.Memory.PageTable[directory][table];
     }
 
-    public static LinkedList<PageTableEntry> GetAreaRequiredPages(PCB process, MemoryArea area) {
+    static LinkedList<PageTableEntry> GetAreaRequiredPages(PCB process, MemoryArea area) {
         LinkedList<PageTableEntry> pages = new LinkedList<PageTableEntry>();
         for (int i = area.StartAddress; i < area.EndAddress; i += 0x1000) {
             pages.add(MemoryManager.GetPage(process, i));
@@ -53,7 +53,7 @@ public class MemoryManager {
         return pages;
     }
 
-    public static void AccessPages(PCB process) {
+    static void AccessPages(PCB process) {
         LinkedList<PageTableEntry> pages = new LinkedList<PageTableEntry>();
         for (MemoryArea memoryArea : process.Memory.Areas) {
             pages.addAll(MemoryManager.GetAreaRequiredPages(process, memoryArea));
@@ -63,7 +63,7 @@ public class MemoryManager {
         }
     }
     
-    public static void ClearAccessesCounters(PCB process) {
+    static void ClearAccessesCounters(PCB process) {
         for (int i = 0; i < 1024; i++) {
             for (int j = 0; j < 1024; j++) {
                 process.Memory.PageTable[i][j].ResetAccess();;
@@ -71,7 +71,7 @@ public class MemoryManager {
         }
     }
 
-    public static int RequestFrame(VirtualMemory memory) {
+    static int RequestFrame(VirtualMemory memory) {
         if (memory.FreeFrames.isEmpty()) {
             throw new IllegalStateException("No free frames");
         }
@@ -79,11 +79,11 @@ public class MemoryManager {
         return frame;
     }
 
-    public static void ReleaseFrame(VirtualMemory memory, int frame) {
+    static void ReleaseFrame(VirtualMemory memory, int frame) {
         memory.FreeFrames.add(frame);
     }
 
-    public static int GetMemoryUsage(LinkedList<MemoryDescriptor> descriptors) {
+    static int GetMemoryUsage(LinkedList<MemoryDescriptor> descriptors) {
         int memoryUsage = 0;
         for (MemoryDescriptor descriptor : descriptors) {
             for (int i = 0; i < 1024; i++) {
