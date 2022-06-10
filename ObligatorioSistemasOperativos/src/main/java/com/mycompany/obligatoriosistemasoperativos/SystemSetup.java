@@ -10,9 +10,9 @@ package com.mycompany.obligatoriosistemasoperativos;
  */
 public class SystemSetup {
      private static SystemSetup instance;
-    private int cantidadNucleos = 0;
-    private int tiempoCPU = 0;
-    private int cantidadRAM = 0;
+    private int coresQuantity = 0;
+    private int CPU_time = 0;
+    private int ramQuantity = 0;
     
     private SystemSetup()
     {}
@@ -26,26 +26,26 @@ public class SystemSetup {
         return instance;
     }
     
-    public void setValores(String pCantidadNucleos, String pTiempoCPU, String pCantidadRAM)
+    public void setValores(String pCoreCuantity, String pCPU_time, String pRamQuantity)
     {
-        this.cantidadNucleos = Integer.valueOf(pCantidadNucleos);
-        this.tiempoCPU =Integer.valueOf(pTiempoCPU);
-        this.cantidadRAM = Integer.valueOf(pCantidadRAM);
+        this.coresQuantity = Integer.valueOf(pCoreCuantity);
+        this.CPU_time =Integer.valueOf(pCPU_time);
+        this.ramQuantity = Integer.valueOf(pRamQuantity);
     }
     
-    public int getCantidadNucleos()
+    public int getCoreQuantity()
     {
-        return this.cantidadNucleos;
+        return this.coresQuantity;
     }
     
     
-    public int getTiempoCPU()
+    public int getCpu_Time()
     {
-        return this.tiempoCPU;
+        return this.CPU_time;
     }
     
-    public int getCantidadRAM()
+    public int getRamQuantity()
     {
-        return this.cantidadRAM;
+        return this.ramQuantity;
     }
 }
