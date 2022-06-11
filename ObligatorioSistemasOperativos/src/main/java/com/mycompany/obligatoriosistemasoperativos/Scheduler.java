@@ -2,8 +2,6 @@ package com.mycompany.obligatoriosistemasoperativos;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Scheduler {
     private static Scheduler instance;
@@ -14,19 +12,16 @@ public class Scheduler {
 
     private final LinkedList<PCB> readyQueue;
     private final LinkedList<PCB> blockedProcesses;
-    private final PCB[] cores;
+    private final Core[] cores;
     private Hardware hardware;
     private final VirtualMemory virtualMemory;
     private final LinkedList<MemoryDescriptor> memoryDescriptors;
     private final LinkedList<PCB> processTable;
     private final Queue<Integer> freePIDs;
-    private final ExecutorService executorService;
-    private long cycles;
-
+    private double timeSliceMS;
     private boolean running;
 
     private Scheduler(Hardware hardware) {
-        executorService = Executors.newSingleThreadExecutor();
         this.hardware = hardware;
         this.virtualMemory = new VirtualMemory(hardware.GetRAMSize());
         this.memoryDescriptors = new LinkedList<>();
@@ -34,12 +29,15 @@ public class Scheduler {
         this.freePIDs = new LinkedList<>();
         this.readyQueue = new LinkedList<>();
         this.blockedProcesses = new LinkedList<>();
-        this.cores = new PCB[hardware.GetCPUCoreCount()];
-        this.cycles = 0;
+        this.cores = new Core[hardware.GetCPUCoreCount()];
+        for (int i = 0; i < cores.length; i++) {
+            cores[i] = new Core(i);
+        }
         this.running = false;
         for (int i = 0; i < MAX_PID; i++) {
             freePIDs.add(i);
         }
+        this.timeSliceMS = DEFAULT_QUANTUM_MS;
     }
 
     public static Scheduler GetInstance(Hardware hardware) {
@@ -49,19 +47,23 @@ public class Scheduler {
         return instance;
     }
 
+    public static Scheduler GetInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("Scheduler not initialized");
+        }
+        return instance;
+    }
+
     public void Start() {
         if (running) {
             throw new IllegalStateException("Already running");
         }
 
-        this.cycles = 0;
         running = true;
 
         Program initialProgram = new Program("init", 0, 0, 0, 1024);
         PCB process = this.CreateProcess(initialProgram, 10, null);
         this.AddProcessToReadyQueue(process);
-        
-        executorService.submit(this::Schedule);
     }
 
     public void Stop() {
@@ -70,7 +72,6 @@ public class Scheduler {
         }
 
         running = false;
-        executorService.shutdownNow();
     }
 
     private PCB CreateProcess(Program program, int priority, PCB parent) {
@@ -120,7 +121,7 @@ public class Scheduler {
 
         PCB[] runningProcesses = new PCB[this.hardware.GetCPUCoreCount()];
         for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
-            runningProcesses[i] = this.cores[i].deepCopy();
+            runningProcesses[i] = this.cores[i].GetRunningProcess().deepCopy();
         }
         return runningProcesses;
     }
@@ -225,7 +226,19 @@ public class Scheduler {
     }
 
     private void Schedule() {
-        while (running) {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        PCB process = this.readyQueue.poll();
+        if (process == null)
+            return;
+
+        for (Core core : cores) {
+            if (core.IsIdle()) {
+                core.DispatchProcess(process, timeSliceMS);
+                process.State = ProcessState.Running;
+                return;
+            }
         }
     }
 
@@ -256,6 +269,42 @@ public class Scheduler {
             }
 
             this.readyQueue.add(process);
+        }
+
+        this.Schedule();
+    }
+
+    public void SetTimeSlice(double milliseconds) {
+        if (running)
+            throw new IllegalStateException("Running");
+        if (milliseconds < 1)
+            throw new IllegalArgumentException("Time slice must be greater than 0");
+
+        this.timeSliceMS = milliseconds;
+    }
+
+    void AppropriateProcess(int cpuCore, ProcessState state) {
+        PCB process = this.cores[cpuCore].AppropriateCPU();
+
+        if (process != null) {
+            process.State = state;
+            switch (state) {
+                case Ready:
+                    this.AddProcessToReadyQueue(process);
+                    break;
+                case Blocked:
+                    this.blockedProcesses.add(process);
+                    this.Schedule();
+                    break;
+                case Finished:
+                    MemoryManager.FreeProcessMemory(this.virtualMemory, process);
+                    processTable.remove(process);
+                    freePIDs.add(process.PID);
+                    this.Schedule();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
