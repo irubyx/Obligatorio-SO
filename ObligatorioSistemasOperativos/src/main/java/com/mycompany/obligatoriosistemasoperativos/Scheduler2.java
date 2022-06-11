@@ -8,34 +8,29 @@ public class Scheduler2 {
     private static Scheduler2 instance;
 
     static final int MAX_PID = 1000;
-    static final double DEFAULT_QUANTUM_MS = 100;
-    static final double NRU_MS_INTERVAL = 100;
+    static final long DEFAULT_QUANTUM_MS = 100;
+    static final long NRU_MS_INTERVAL = 100;
 
     private final LinkedList<PCB> readyQueue;
     private final LinkedList<PCB> blockedProcesses;
-    private final Core2[] cores;
+    private Core2[] cores;
     private Hardware hardware;
-    private final VirtualMemory virtualMemory;
+    private VirtualMemory virtualMemory;
     private final LinkedList<MemoryDescriptor> memoryDescriptors;
     private final LinkedList<PCB> processTable;
     private final Queue<Integer> freePIDs;
-    private double quantumMS;
+    private long quantumMS;
     private boolean running;
     private Semaphore mutex;
 
 
     private Scheduler2() {
-        this.virtualMemory = new VirtualMemory(hardware.GetRAMSize());
         this.memoryDescriptors = new LinkedList<>();
         this.processTable = new LinkedList<>();
         this.freePIDs = new LinkedList<>();
         this.readyQueue = new LinkedList<>();
         this.blockedProcesses = new LinkedList<>();
-        this.cores = new Core2[hardware.GetCPUCoreCount()];
         this.mutex = new Semaphore(1);
-        for (int i = 0; i < cores.length; i++) {
-            cores[i] = new Core2(i);
-        }
         this.running = false;
         for (int i = 0; i < MAX_PID; i++) {
             freePIDs.add(i);
@@ -87,9 +82,14 @@ public class Scheduler2 {
             throw new IllegalStateException("Can't bind hardware while scheduler is running");
 
         this.hardware = hardware;
+        this.virtualMemory = new VirtualMemory(hardware.GetRAMSize());
+        this.cores = new Core2[hardware.GetCPUCoreCount()];
+        for (int i = 0; i < cores.length; i++) {
+            cores[i] = new Core2(i);
+        }
     }
 
-    public void SetQuantumMS(double quantumMS) {
+    public void SetTimeSlice(long quantumMS) {
         if (this.running)
             throw new IllegalStateException("Can't change quantum while scheduler is running");
 
@@ -135,6 +135,52 @@ public class Scheduler2 {
 
         PCB process = this.GetProcess(pid);
         this.UnblockProcess(process);
+    }
+
+    /*
+     * Querying
+     */
+
+    public PCB[] GetProcesses() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        PCB[] runningProcesses = new PCB[this.hardware.GetCPUCoreCount()];
+        for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
+            runningProcesses[i] = this.cores[i].RunningProcess.deepCopy();
+        }
+        return runningProcesses;
+    }
+
+    public LinkedList<PCB> GetReadyQueue() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        LinkedList<PCB> readyQueueCopy = new LinkedList<>();
+        for (PCB process : this.readyQueue) {
+            readyQueueCopy.add(process.deepCopy());
+        }
+
+        return readyQueueCopy;
+    }
+
+    public LinkedList<PCB> GetBlockedProcesses() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        LinkedList<PCB> blockedProcessesCopy = new LinkedList<>();
+        for (PCB process : this.blockedProcesses) {
+            blockedProcessesCopy.add(process.deepCopy());
+        }
+
+        return blockedProcessesCopy;
+    }
+
+    public int GetMemoryUsage() {
+        if (!running)
+            throw new IllegalStateException("Not running");
+
+        return MemoryManager.GetMemoryUsage(this.memoryDescriptors);
     }
 
     /*
