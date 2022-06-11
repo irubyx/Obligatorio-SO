@@ -6,6 +6,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.LinkedList;
+import javax.swing.Timer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class PCB implements Serializable {
     public final int PID;
@@ -15,6 +18,7 @@ public class PCB implements Serializable {
     public final Program Program;
     public final MemoryDescriptor Memory;
     public final SchedulingData SchedulingData;
+    private Timer ioResponseTimer;
     
     ProcessState State;
     int Priority;
@@ -69,5 +73,34 @@ public class PCB implements Serializable {
 
     public int GetPriority() {
         return this.Priority;
+    }
+    
+    public void AwaitIO(int ioTimeMS) {
+        this.ioResponseTimer = new Timer(ioTimeMS, new InterruptIOResponseActionListener(this.PID));
+        this.ioResponseTimer.setRepeats(false);
+        this.ioResponseTimer.start();
+    }
+
+    public void StopAwaitingIO() {
+        if (this.ioResponseTimer != null) {
+            this.ioResponseTimer.stop();
+            this.ioResponseTimer = null;
+        }
+    }
+
+
+    private class InterruptIOResponseActionListener implements ActionListener {
+        private final int PID;
+        private final Scheduler2 scheduler;
+
+        public InterruptIOResponseActionListener(int PID) {
+            this.PID = PID;
+            this.scheduler = Scheduler2.GetInstance();
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            this.scheduler.InterruptIOResponse(this.PID);
+        }
     }
 }
