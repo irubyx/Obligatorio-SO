@@ -28,7 +28,7 @@ public class PCB implements Serializable {
         this.Memory = new MemoryDescriptor();
         this.State = ProcessState.New;
         this.Priority = 1;
-        this.SchedulingData = new SchedulingData();
+        this.SchedulingData = new SchedulingData(program.ExecutionTimeMS, program.IOIntervalMS);
     }
 
     void AddChild(PCB child) {
