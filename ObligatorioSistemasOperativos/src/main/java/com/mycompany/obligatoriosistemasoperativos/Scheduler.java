@@ -422,6 +422,10 @@ public class Scheduler {
                 }
                 this.cores[process.SchedulingData.assignedCore].Appropriate();
                 this.processTable.remove(process);
+                for(PCB hijo : process.Children)
+                {
+                    this.TerminateProcess(hijo.PID);
+                }
                 this.freePIDs.add(process.PID);
                 process.State = ProcessState.Finished;
                 MemoryManager.FreeProcessMemory(this.virtualMemory, process);
@@ -489,7 +493,6 @@ public class Scheduler {
         if (!this.blockedProcesses.contains(Process)) {
             throw new IllegalArgumentException("Process not found in blocked queue");
         }
-
         try {
             this.mutex.acquire();
             try {
