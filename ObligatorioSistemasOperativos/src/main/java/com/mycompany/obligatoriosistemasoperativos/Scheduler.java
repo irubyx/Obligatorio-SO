@@ -149,77 +149,98 @@ public class Scheduler {
     /*
      * Querying
      */
-    public LinkedList<PCB> GetRunningProcesses() {
+    public LinkedList<ProcessDetail> GetRunningProcesses() {
         if (!running) {
             throw new IllegalStateException("Not running");
         }
 
-        LinkedList<PCB> runningProcesses = new LinkedList<>();
-        for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
-            if (!this.cores[i].IsIdle()) {
-                PCB process = this.cores[i].RunningProcess.deepCopy();
-                runningProcesses.add(process);
+        LinkedList<ProcessDetail> runningProcesses = new LinkedList<>();
+        try {
+            this.mutex.acquire();
+            try {
+                for (int i = 0; i < this.hardware.GetCPUCoreCount(); i++) {
+                    if (!this.cores[i].IsIdle()) {
+                        PCB process = this.cores[i].RunningProcess;
+                        ProcessDetail processDetail = new ProcessDetail(process.PID, process.Program.Name, process.State, process.Priority);
+                        runningProcesses.add(processDetail);
+                    }
+                }
+            } finally {
+                this.mutex.release();
             }
+        } catch (InterruptedException e) {
         }
+       
         return runningProcesses;
     }
 
-    public LinkedList<PCB> GetAllProcesses() {
-        LinkedList<PCB> processes = new LinkedList<>();
-        processes.addAll(this.GetRunningProcesses());
-        processes.addAll(this.GetReadyQueue());
-        processes.addAll(this.GetBlockedProcesses());
+    public LinkedList<ProcessDetail> GetAllProcesses() {
+        if (!running) {
+            throw new IllegalStateException("Not running");
+        }
+        
+        LinkedList<ProcessDetail> processes = new LinkedList<>();
+        try {
+            this.mutex.acquire();
+            try {
+                for (PCB process : this.processTable) {
+                    ProcessDetail processDetail = new ProcessDetail(process.PID, process.Program.Name, process.State, process.Priority);
+                    processes.add(processDetail);
+                }
+            } finally {
+                this.mutex.release();
+            }
+        } catch (InterruptedException e) {
+        }
+
         return processes;
     }
 
-    public LinkedList<PCB> GetReadyQueue() {
+    public LinkedList<ProcessDetail> GetReadyQueue() {
         if (!running) {
             throw new IllegalStateException("Not running");
         }
 
-        LinkedList<PCB> readyQueueCopy = new LinkedList<>();
-        for (PCB process : this.readyQueue) {
-            readyQueueCopy.add(process.deepCopy());
+        LinkedList<ProcessDetail> readyQueueCopy = new LinkedList<>();
+        try {
+            this.mutex.acquire();
+            try {
+                for (PCB process : this.readyQueue) {
+                    ProcessDetail processDetail = new ProcessDetail(process.PID, process.Program.Name, process.State, process.Priority);
+                    readyQueueCopy.add(processDetail);
+                }
+            } finally {
+                this.mutex.release();
+            }
+        } catch (InterruptedException e) {
         }
 
         return readyQueueCopy;
     }
 
-    public LinkedList<PCB> GetBlockedProcesses() {
+    public LinkedList<ProcessDetail> GetBlockedProcesses() {
         if (!running) {
             throw new IllegalStateException("Not running");
         }
 
-        LinkedList<PCB> blockedProcessesCopy = new LinkedList<>();
-        for (PCB process : this.blockedProcesses) {
-            blockedProcessesCopy.add(process.deepCopy());
+        LinkedList<ProcessDetail> blockedProcessesCopy = new LinkedList<>();
+        try {
+            this.mutex.acquire();
+            try {
+                for (PCB process : this.blockedProcesses) {
+                    ProcessDetail processDetail = new ProcessDetail(process.PID, process.Program.Name, process.State, process.Priority);
+                    blockedProcessesCopy.add(processDetail);
+                }
+            } finally {
+                this.mutex.release();
+            }
+        } catch (InterruptedException e) {
         }
+        
 
         return blockedProcessesCopy;
     }
 
-    /*
-     public LinkedList<PCB> GetProcesses() {
-        if (!running) {
-            throw new IllegalStateException("Not running");
-        }
-        return this.processTable;
-    }
-     
-    public LinkedList<PCB> GetReadyQueue() {
-        if (!running) {
-            throw new IllegalStateException("Not running");
-        }
-        return this.readyQueue;
-    }
-
-    public LinkedList<PCB> GetBlockedProcesses() {
-        if (!running) {
-            throw new IllegalStateException("Not running");
-        }
-        return this.blockedProcesses;
-    }
-     */
     public int GetMemoryUsage() {
         if (!running) {
             throw new IllegalStateException("Not running");
@@ -401,6 +422,12 @@ public class Scheduler {
     }
 
     private void KillProcess(PCB process) {
+        this.KillProcessAux(process);
+        process.Parent.RemoveChild(process);
+        this.Schedule();
+    }
+
+    private void KillProcessAux(PCB process) {
         if (!this.running) {
             throw new IllegalStateException("Not running");
         }
@@ -409,6 +436,10 @@ public class Scheduler {
         }
         if (!this.processTable.contains(process)) {
             throw new IllegalArgumentException("Process not found");
+        }
+
+        for (PCB hijo : process.Children) {
+            this.KillProcessAux(hijo);
         }
 
         try {
@@ -422,10 +453,6 @@ public class Scheduler {
                 }
                 this.cores[process.SchedulingData.assignedCore].Appropriate();
                 this.processTable.remove(process);
-                for(PCB hijo : process.Children)
-                {
-                    this.TerminateProcess(hijo.PID);
-                }
                 this.freePIDs.add(process.PID);
                 process.State = ProcessState.Finished;
                 MemoryManager.FreeProcessMemory(this.virtualMemory, process);
@@ -433,10 +460,7 @@ public class Scheduler {
                 this.mutex.release();
             }
         } catch (InterruptedException e) {
-        }
-
-        this.Schedule();
-
+        }   
     }
 
     private void BlockProcess(PCB process, long time) {
@@ -464,7 +488,7 @@ public class Scheduler {
                 }
                 process.State = ProcessState.Blocked;
                 if (time > 0) {
-                    process.AwaitIO((int) time);
+                    this.AwaitIO(process, time);
                 }
                 this.blockedProcesses.add(process);
 
@@ -497,6 +521,9 @@ public class Scheduler {
             this.mutex.acquire();
             try {
                 this.blockedProcesses.remove(Process);
+                if (Process.ioResponseFuture != null) {
+                    Process.ioResponseFuture.cancel(true);
+                }
                 Process.State = ProcessState.Ready;
                 this.EnqueueProcess(Process);
             } finally {
@@ -508,7 +535,10 @@ public class Scheduler {
         this.Schedule();
     }
 
-    public PCB GetProcess(int pid) {
+
+
+
+    PCB GetProcess(int pid) {
         if (!this.running) {
             throw new IllegalStateException("Scheduler is not running");
         }
@@ -524,6 +554,18 @@ public class Scheduler {
 
         return null;
     }
+
+    void AwaitIO(PCB process, long delay) {
+        process.ioResponseFuture = InterruptionManager.SetInterrupt(new ResponseIORunnable(process.PID), delay);
+    }
+
+    void StopAwaitingIO(PCB process) {
+        if (process.ioResponseFuture != null) {
+            InterruptionManager.CancelInterrupt(process.ioResponseFuture);
+            process.ioResponseFuture = null;
+        }
+    }
+
 
     void InterruptIO(Core core) {
         this.BlockProcess(core.RunningProcess, core.RunningProcess.SchedulingData.IOInterval);
@@ -562,5 +604,22 @@ public class Scheduler {
 
         this.EnqueueProcess(process);
         this.Schedule();
+    }
+    
+
+    private class ResponseIORunnable implements Runnable {
+        private final int pid;
+        private final Scheduler scheduler;
+
+
+        private ResponseIORunnable(int pid) {
+            this.pid = pid;
+            this.scheduler = Scheduler.GetInstance();
+        }
+
+        @Override
+        public void run() {
+            this.scheduler.InterruptIOResponse(this.pid);
+        }
     }
 }

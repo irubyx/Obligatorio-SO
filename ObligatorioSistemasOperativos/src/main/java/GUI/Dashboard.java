@@ -217,13 +217,13 @@ public class Dashboard extends javax.swing.JFrame {
     private void cargarTabla() {
         vaciarTabla();
         String[] texto = new String[4];
-        LinkedList<PCB> procesos = scheduler.GetAllProcesses();
+        LinkedList<ProcessDetail> procesos = scheduler.GetAllProcesses();
         //LinkedList<PCB> procesos =scheduler.GetProcesses(); 
-        for (PCB p :procesos ) {
+        for (ProcessDetail p :procesos ) {
             texto[0] = String.valueOf(p.PID);
-            texto[1] = String.valueOf(p.Program.Name);
-            texto[2] = String.valueOf(p.GetState());
-            texto[3] = String.valueOf(p.GetPriority());
+            texto[1] = String.valueOf(p.Name);
+            texto[2] = String.valueOf(p.State);
+            texto[3] = String.valueOf(p.Priority);
             //texto[4] = String.valueOf(p.getRAM());
             modeloProcesos.addRow(texto);
         }
