@@ -6,7 +6,8 @@ package GUI;
 
 import com.mycompany.obligatoriosistemasoperativos.*;
 import java.util.LinkedList;
-import javax.swing.SwingUtilities;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -16,7 +17,7 @@ import javax.swing.table.DefaultTableModel;
 public class Dashboard extends javax.swing.JFrame {
 
     public static Scheduler scheduler;
-    DefaultTableModel modeloProcesos;
+    static DefaultTableModel modeloProcesos;
 
     /**
      * Creates new form Dashboard
@@ -89,6 +90,11 @@ public class Dashboard extends javax.swing.JFrame {
         });
 
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarActionPerformed(evt);
+            }
+        });
 
         btnRefresh.setText("R");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
@@ -168,6 +174,10 @@ public class Dashboard extends javax.swing.JFrame {
         cargarTabla();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        new ModificarProceso().setVisible(true);
+    }//GEN-LAST:event_btnModificarActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -200,6 +210,8 @@ public class Dashboard extends javax.swing.JFrame {
             public void run() {
                 Dashboard pantalla = new Dashboard();
                 pantalla.setVisible(true);
+                DashboardUpdate dashboardUpdate= new DashboardUpdate(pantalla);
+                dashboardUpdate.start();
 
             }
         });
@@ -214,7 +226,7 @@ public class Dashboard extends javax.swing.JFrame {
         scheduler.RunProgram(p3, 1, 0);
     }
 
-    private void cargarTabla() {
+    public void cargarTabla() {
         vaciarTabla();
         String[] texto = new String[4];
         LinkedList<ProcessDetail> procesos = scheduler.GetAllProcesses();
@@ -227,7 +239,7 @@ public class Dashboard extends javax.swing.JFrame {
             //texto[4] = String.valueOf(p.getRAM());
             modeloProcesos.addRow(texto);
         }
-
+        modeloProcesos.fireTableDataChanged();
     }
 
     private void vaciarTabla() {

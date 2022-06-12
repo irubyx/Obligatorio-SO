@@ -170,7 +170,7 @@ public class Scheduler {
             }
         } catch (InterruptedException e) {
         }
-       
+
         return runningProcesses;
     }
 
@@ -178,7 +178,7 @@ public class Scheduler {
         if (!running) {
             throw new IllegalStateException("Not running");
         }
-        
+
         LinkedList<ProcessDetail> processes = new LinkedList<>();
         try {
             this.mutex.acquire();
@@ -236,7 +236,6 @@ public class Scheduler {
             }
         } catch (InterruptedException e) {
         }
-        
 
         return blockedProcessesCopy;
     }
@@ -408,7 +407,7 @@ public class Scheduler {
             this.mutex.acquire();
             try {
                 for (int i = 0; i < this.readyQueue.size(); i++) {
-                    if (this.readyQueue.get(i).Priority < process.Priority) {
+                    if (this.readyQueue.get(i).Priority > process.Priority) {
                         this.readyQueue.add(i, process);
                         return;
                     }
@@ -451,7 +450,9 @@ public class Scheduler {
                 if (this.blockedProcesses.contains(process)) {
                     this.blockedProcesses.remove(process);
                 }
-                this.cores[process.SchedulingData.assignedCore].Appropriate();
+                if (process.SchedulingData.assignedCore >= 0) {
+                    this.cores[process.SchedulingData.assignedCore].Appropriate();
+                }
                 this.processTable.remove(process);
                 this.freePIDs.add(process.PID);
                 process.State = ProcessState.Finished;
@@ -460,7 +461,7 @@ public class Scheduler {
                 this.mutex.release();
             }
         } catch (InterruptedException e) {
-        }   
+        }
     }
 
     private void BlockProcess(PCB process, long time) {
@@ -525,18 +526,14 @@ public class Scheduler {
                     Process.ioResponseFuture.cancel(true);
                 }
                 Process.State = ProcessState.Ready;
-                this.EnqueueProcess(Process);
             } finally {
                 this.mutex.release();
             }
         } catch (InterruptedException e) {
         }
-
+        this.EnqueueProcess(Process);
         this.Schedule();
     }
-
-
-
 
     PCB GetProcess(int pid) {
         if (!this.running) {
@@ -565,7 +562,6 @@ public class Scheduler {
             process.ioResponseFuture = null;
         }
     }
-
 
     void InterruptIO(Core core) {
         this.BlockProcess(core.RunningProcess, core.RunningProcess.SchedulingData.IOInterval);
@@ -605,12 +601,11 @@ public class Scheduler {
         this.EnqueueProcess(process);
         this.Schedule();
     }
-    
 
     private class ResponseIORunnable implements Runnable {
+
         private final int pid;
         private final Scheduler scheduler;
-
 
         private ResponseIORunnable(int pid) {
             this.pid = pid;

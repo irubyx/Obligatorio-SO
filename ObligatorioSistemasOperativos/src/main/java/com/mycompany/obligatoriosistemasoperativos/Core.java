@@ -42,10 +42,15 @@ public class Core {
 
     PCB Appropriate() {
         long burstTime;
-        if (this.RunningProcessFuture.isDone())
+        if (RunningProcess == null) {
+            throw new IllegalStateException("Core " + CoreID + " is already running a process");
+        }
+        if (this.RunningProcessFuture.getDelay(TimeUnit.MILLISECONDS) <= 0) {
             burstTime = this.RunningProcess.SchedulingData.NextBurst;
-        else
-            burstTime = this.RunningProcess.SchedulingData.NextBurst - this.RunningProcessFuture.getDelay(TimeUnit.MILLISECONDS); 
+        } else {
+            burstTime = this.RunningProcess.SchedulingData.NextBurst - this.RunningProcessFuture.getDelay(TimeUnit.MILLISECONDS);
+            InterruptionManager.CancelInterrupt(this.RunningProcessFuture);
+        }
 
         this.SaveContext(burstTime);
         PCB process = this.RunningProcess;
@@ -70,8 +75,8 @@ public class Core {
     /*
      * Interrupt Runnables
      */
-
     abstract private class InterruptRunnable implements Runnable {
+
         private final Core core;
         private final Scheduler scheduler;
 
@@ -82,6 +87,7 @@ public class Core {
     }
 
     private class InterruptTimerRunnable extends InterruptRunnable {
+
         private InterruptTimerRunnable(Core core) {
             super(core);
         }
@@ -93,6 +99,7 @@ public class Core {
     }
 
     private class InterruptIORunnable extends InterruptRunnable {
+
         private InterruptIORunnable(Core core) {
             super(core);
         }
@@ -104,6 +111,7 @@ public class Core {
     }
 
     private class InterruptCompletionRunnable extends InterruptRunnable {
+
         private InterruptCompletionRunnable(Core core) {
             super(core);
         }
