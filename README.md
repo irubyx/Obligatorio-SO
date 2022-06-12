@@ -18,6 +18,10 @@ Repositorio creado con el fin de almacenar el proyecto final de sistemas operati
     - [Escenario](#escenario)
     - [Requisitos](#requisitos)
   - [Como utilizar la aplicación](#como-utilizar-la-aplicación)
+    - [Setup](#setup)
+    - [Dashboard](#dashboard)
+      - [Agregar proceso](#agregar-proceso)
+      - [Modificar proceso](#modificar-proceso)
 
 ## Problema
 ### Definición
@@ -46,3 +50,71 @@ Se nos solicitó además que el software resultado contenga las siguientes carac
   - Lista de los procesos bloqueados (indicando si se encuentra bloqueado por el usuario o por una entrada/salida) ordenada en cada momento por cuál será el próximo a ser desbloqueado.
 
 ## Como utilizar la aplicación
+### Setup
+Ni bien se inicia la aplicación el usuario deberá visualizar una interfaz como la que se presenta a continuación, llamada `Setup`, en la cual se ha de indicar las especificaciones del sistema de cómputo a simular:
+
+![]()
+
+A continuación se brinda una breve descripción de cada campo:
+
+- **Cantidad de núcleos del sistema:**
+  - Se ha de proporcionar la cantidad de núcleos que tendrá el sistema en la simulación.
+- **Tiempo disponible en CPU:**
+  - Se ha de indicar
+- **RAM de la PC:**
+  - Al igual que el primer campo, se ha de indicar la cantidad de gigabytes de RAM que tendrá el sistema en la simulación.
+
+Una vez especificadas las características del sistema, se deberá dar click en `Inicio` para iniciar la simulación.
+
+### Dashboard
+Lo siguiente que se debe visualizar es el `Dashboard`, el cuál contiene dos tablas. La tabla de `Procesos`, que contiene todos los procesos corriendo en el sistema. Y la tabla de `Núcleos` ...
+
+En la tabla de `Procesos` se brinda la siguiente información:
+- **ID:**
+  - Identificador único que tiene cada proceso.
+- **Nombre:**
+  - Nombre del proceso.
+- **Estado:**
+  - Estado en el que se encuentra el proceso actualmente. Las posibles opciones son: `Running`, `Blocked` y `Ready`.
+- **Prioridad:**
+  - Prioridad que tiene el proceso. Entero entre 1 y 99, siendo 1 la prioridad más baja de todas y 99 la prioridad más alta. 
+
+En la tabla de `Núcleos` se brinda la siguiente información:
+...
+
+![]()
+
+Debajo de la misma tabla, se encuentra la opción de `Agregar` y `Modificar` procesos, donde se podrán agregar nuevos procesos al sistema indicando características propias del proceso a agregar, o modificar un proceso que fue agregado previamente.
+
+#### Agregar proceso
+Si se desea agregar un proceso, se ha de dar click en la opción de `Agregar`, mencionada en el apartado de [Dashboard](#dashboard). Una vez dentro, se solicita al usuario indicar las siguientes características del proceso a agregar:
+
+- **Nombre:**
+  - Se ha de indicar el nombre del proceso a agregar.
+- **Tiempo requerido:**
+  - coso
+- **Prioridad:**
+  - Prioridad que tendrá este proceso. Se debe proveer un número entre 1 y 99, siendo 1 la prioridad más baja de todas y 99 la prioridad más alta. 
+- **Tiempo entre E/S:**
+  - coso
+- **ID Padre:**
+  - ID del proceso padre del proceso a agregar.
+- **Tiempo salir E/S:**
+  - coso
+- **Tamaño memoria:**
+  - Se debe indicar la cantidad de memoria del sistema que consume el proceso a agregar.
+
+![]()
+
+Una vez se especifiquen los campos requeridos, se debe de dar click en el botón de `Agregar` para agregar el proceso con las características que fueron indicadas.\
+Opcionalmente, existe la posibilidad de volver a la pestaña de `Dashboard`, para ello se ha de dar click en el botón de `Atrás`.
+
+#### Modificar proceso
+Si se desea modificar un proceso que fue agregado previamente al sistema, se ha de dar click en el botón de `Modificar`, mencionada en el apartado de [Dashboard](#dashboard). Una vez dentro, se brindan los campos modificables de cada proceso, a continuación se brinda la lista de los mismos y una breve descripción:
+
+...
+
+![]()
+
+Una vez modificados los campos del proceso, se debe dar click en el botón de `Guardar cambios` para guardar y modificar los datos del proceso seleccionado.\
+Opcionalmente, existe la posibilidad de volver a la pestaña de `Dashboard`, para ello se ha de dar click en el botón de `Atrás`.
