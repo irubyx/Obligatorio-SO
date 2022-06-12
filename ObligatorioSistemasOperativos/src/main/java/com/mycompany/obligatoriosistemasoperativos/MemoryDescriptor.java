@@ -1,10 +1,11 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class MemoryDescriptor {
+public class MemoryDescriptor implements Serializable {
     LinkedList<MemoryArea> Areas;
-    final PageTableEntry[][] PageTable;
+    final  PageTableEntry[][] PageTable;
 
     MemoryDescriptor() {
         PageTable = new PageTableEntry[1024][1024];

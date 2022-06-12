@@ -1,6 +1,8 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
-public class ProcessContext {
+import java.io.Serializable;
+
+public class ProcessContext implements Serializable{
     ProcessContext() {};
 
     void SaveContext(ProcessContext newContext) {};

@@ -13,12 +13,12 @@ import java.awt.event.ActionListener;
 public class PCB implements Serializable {
     public final int PID;
     public final PCB Parent;
-    public final ProcessContext Context;
-    public final LinkedList<PCB> Children;
+    public transient final ProcessContext Context;
+    public transient final LinkedList<PCB> Children;
     public final Program Program;
-    public final MemoryDescriptor Memory;
-    public final SchedulingData SchedulingData;
-    private Timer ioResponseTimer;
+    public transient final MemoryDescriptor Memory;
+    public transient final SchedulingData SchedulingData;
+    private transient Timer ioResponseTimer;
     
     ProcessState State;
     int Priority;
@@ -91,11 +91,11 @@ public class PCB implements Serializable {
 
     private class InterruptIOResponseActionListener implements ActionListener {
         private final int PID;
-        private final Scheduler2 scheduler;
+        private final Scheduler scheduler;
 
         public InterruptIOResponseActionListener(int PID) {
             this.PID = PID;
-            this.scheduler = Scheduler2.GetInstance();
+            this.scheduler = Scheduler.GetInstance();
         }
 
         @Override

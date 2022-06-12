@@ -1,6 +1,8 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
-public class Program {
+import java.io.Serializable;
+
+public class Program implements Serializable{
     public final int ExecutionTimeMS;
     public final int IOIntervalMS;
     public final int IOWaitTimeMS;

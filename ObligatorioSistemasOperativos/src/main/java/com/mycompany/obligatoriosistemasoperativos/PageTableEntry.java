@@ -1,6 +1,8 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
-public class PageTableEntry {
+import java.io.Serializable;
+
+public class PageTableEntry implements Serializable{
     public final int StartAddress;
 
     boolean Valid;

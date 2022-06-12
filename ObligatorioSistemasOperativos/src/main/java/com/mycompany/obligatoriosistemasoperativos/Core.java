@@ -1,17 +1,17 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
+import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.Timer;
-
 public class Core {
+
     final int CoreID;
-    private final ProcessContext Context;
-    private PCB RunningProcess;
-    Timer pitTimer;
-    Timer ioTimer;
-    Timer executionTimer;
+    final ProcessContext Context;
+    PCB RunningProcess;
+    Timer PITTimer;
+    Timer IOTimer;
+    Timer ExecutionTimer;
     private boolean timerFlag;
 
     Core(int coreId) {
@@ -20,71 +20,147 @@ public class Core {
         this.Context = new ProcessContext();
     }
 
-    void DispatchProcess(PCB process, double timeSliceMS) {
-        if (RunningProcess != null) 
+    void Dispatch(PCB process, double timeSliceMS) {
+        if (RunningProcess != null) {
             throw new IllegalStateException("Core " + CoreID + " is already running a process");
-
-        RunningProcess = process;
+        }
+        this.timerFlag = false;
+        this.RunningProcess = process;
         process.State = ProcessState.Running;
-        Context.SaveContext(process.Context);
-        pitTimer = new Timer((int) timeSliceMS, new CoreTerminationActionListener(this, timeSliceMS, ProcessState.Ready));
-        pitTimer.setRepeats(false);
-        ioTimer = new Timer((int) process.SchedulingData.RemainingTimeTillNextIO, new CoreTerminationActionListener(this, process.SchedulingData.RemainingTimeTillNextIO, ProcessState.Ready));
-        ioTimer.setRepeats(false);
-        executionTimer = new Timer((int) process.SchedulingData.RemainingTimeTillTermination, new CoreTerminationActionListener(this, process.SchedulingData.RemainingTimeTillTermination, ProcessState.Finished));
-        executionTimer.setRepeats(false);
-
-        pitTimer.start();
-        ioTimer.start();
-        executionTimer.start();
+        this.RestoreContext();
+        this.PITTimer = new Timer((int) timeSliceMS, new InterruptTimerActionListener(this, timeSliceMS));
+        this.PITTimer.setRepeats(false);
+        if (process.SchedulingData.IOInterval > 0) {
+            this.IOTimer = new Timer((int) process.SchedulingData.RemainingTimeTillNextIO, new InterruptIOActionListener(this, process.SchedulingData.RemainingTimeTillNextIO));
+            this.IOTimer.setRepeats(false);
+            this.IOTimer.start();
+        }
+        if (!process.SchedulingData.Loops) {
+            this.ExecutionTimer = new Timer((int) process.SchedulingData.RemainingTimeTillTermination, new InterruptCompletionActionListener(this, process.SchedulingData.RemainingTimeTillTermination));
+            this.ExecutionTimer.setRepeats(false);
+            this.ExecutionTimer.start();
+        }
+        this.PITTimer.start();
     }
 
-    PCB GetRunningProcess() {
-        return RunningProcess;
-    }
-
-    PCB AppropriateCPU() {
-        RunningProcess.Context.SaveContext(Context);
-        PCB process = RunningProcess;
-        RunningProcess = null;
+    PCB Appropriate() {
+        this.timerFlag = true;
+        if (this.PITTimer != null) {
+            this.PITTimer.stop();
+        }
+        if (this.IOTimer != null) {
+            this.IOTimer.stop();
+        }
+        if (this.ExecutionTimer != null) {
+            this.ExecutionTimer.stop();
+        }
+        this.SaveContext();
+        PCB process = this.RunningProcess;
+        this.RunningProcess = null;
         return process;
     }
 
     boolean IsIdle() {
         return RunningProcess == null;
     }
-    
 
-    private class CoreTerminationActionListener implements ActionListener {
-        private final Core core;
-        private final double timeBurst;
-        private final Scheduler scheduler;
-        private final ProcessState endState;
+    private void SaveContext() {
+        this.RunningProcess.Context.SaveContext(this.Context);
+        long elapsedTime = System.nanoTime() - this.RunningProcess.SchedulingData.LastExecutionTime;
+        this.RunningProcess.SchedulingData.RemainingTimeTillTermination -= elapsedTime;
+        this.RunningProcess.SchedulingData.RemainingTimeTillNextIO -= elapsedTime;
+        if (this.RunningProcess.SchedulingData.RemainingTimeTillTermination < 0) {
+            this.RunningProcess.SchedulingData.RemainingTimeTillTermination = 0;
+        }
+        if (this.RunningProcess.SchedulingData.RemainingTimeTillNextIO < 0) {
+            this.RunningProcess.SchedulingData.RemainingTimeTillNextIO = 0;
+        }
+    }
 
-        private CoreTerminationActionListener(Core core, double timeBurst, ProcessState endState) {
+    private void RestoreContext() {
+        this.Context.SaveContext(this.RunningProcess.Context);
+        this.RunningProcess.SchedulingData.LastExecutionTime = System.nanoTime();
+    }
+
+    abstract private class CoreTerminationActionListener implements ActionListener {
+
+        protected final Core core;
+        protected final double timeBurst;
+        protected final Scheduler scheduler;
+
+        private CoreTerminationActionListener(Core core, double timeBurst) {
             this.core = core;
             this.timeBurst = timeBurst;
             this.scheduler = Scheduler.GetInstance();
-            this.endState = endState;
         }
 
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            if (!core.timerFlag) {
-                core.timerFlag = true;
-                core.pitTimer.stop();
-                core.ioTimer.stop();
-                core.executionTimer.stop();
-                core.RunningProcess.SchedulingData.RemainingTimeTillTermination -= timeBurst;
-                if (core.RunningProcess.SchedulingData.RemainingTimeTillTermination <= 0) {
-                    core.RunningProcess.SchedulingData.RemainingTimeTillTermination = 0;
+        protected void preAction() {
+            this.core.timerFlag = true;
+            if (this.core.PITTimer != null) {
+                this.core.PITTimer.stop();
+            }
+            if (this.core.IOTimer != null) {
+                this.core.IOTimer.stop();
+            }
+            if (this.core.ExecutionTimer != null) {
+                this.core.ExecutionTimer.stop();
+            }
+            if (!this.core.RunningProcess.SchedulingData.Loops) {
+                this.core.RunningProcess.SchedulingData.RemainingTimeTillTermination -= this.timeBurst;
+                if (this.core.RunningProcess.SchedulingData.RemainingTimeTillTermination <= 0) {
+                    this.core.RunningProcess.SchedulingData.RemainingTimeTillTermination = 0;
                 }
-                core.RunningProcess.SchedulingData.RemainingTimeTillNextIO -= timeBurst;
-                if (core.RunningProcess.SchedulingData.RemainingTimeTillNextIO <= 0) {
-                    core.RunningProcess.SchedulingData.RemainingTimeTillNextIO = 0;
+            }
+            if (this.core.RunningProcess.SchedulingData.IOInterval != 0) {
+                this.core.RunningProcess.SchedulingData.RemainingTimeTillNextIO -= this.timeBurst;
+                if (this.core.RunningProcess.SchedulingData.RemainingTimeTillNextIO <= 0) {
+                    this.core.RunningProcess.SchedulingData.RemainingTimeTillNextIO = 0;
                 }
-                scheduler.AppropriateProcess(core.CoreID, endState);
             }
         }
     }
-}
+        private class InterruptIOActionListener extends CoreTerminationActionListener {
+
+            private InterruptIOActionListener(Core core, double timeBurst) {
+                super(core, timeBurst);
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (!this.core.timerFlag) {
+                    super.preAction();
+                    this.scheduler.InterruptIO(this.core);
+                }
+            }
+        }
+
+        private class InterruptTimerActionListener extends CoreTerminationActionListener {
+
+            private InterruptTimerActionListener(Core core, double timeBurst) {
+                super(core, timeBurst);
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (!this.core.timerFlag) {
+                    super.preAction();
+                    this.scheduler.InterruptTimer(this.core);
+                }
+            }
+        }
+
+        private class InterruptCompletionActionListener extends CoreTerminationActionListener {
+
+            private InterruptCompletionActionListener(Core core, double timeBurst) {
+                super(core, timeBurst);
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (!this.core.timerFlag) {
+                    super.preAction();
+                    this.scheduler.InterruptCompletion(this.core);
+                }
+            }
+        }
+    }

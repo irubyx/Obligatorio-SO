@@ -18,7 +18,7 @@ class MemoryManager {
             startAddress = area.EndAddress;
         }
 
-        if (startAddress + size > 0xFFFFFFFF)
+        if (startAddress + size > Integer.MAX_VALUE)
             throw new IllegalArgumentException("Not enough memory");
 
         memory.Areas.add(new MemoryArea(startAddress, startAddress + size, memory));

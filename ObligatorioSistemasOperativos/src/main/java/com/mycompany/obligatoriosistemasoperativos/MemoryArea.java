@@ -1,7 +1,9 @@
 package com.mycompany.obligatoriosistemasoperativos;
 
-public class MemoryArea {
-    final MemoryDescriptor Owner;
+import java.io.Serializable;
+
+public class MemoryArea implements Serializable{
+    final transient MemoryDescriptor Owner;
     final int Size;
     final int StartAddress;
     final int EndAddress;

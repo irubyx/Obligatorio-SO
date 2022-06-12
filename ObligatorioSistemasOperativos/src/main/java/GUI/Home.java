@@ -125,8 +125,8 @@ public class Home extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        SystemSetup singleton = SystemSetup.getInstance();
-        singleton.setValores(this.txtCantNucleos.getText(),this.txtTiempoCPU.getText() ,this.txtRAM.getText());
+        Hardware hardware = Hardware.getInstance();
+        hardware.setValues(this.txtCantNucleos.getText(),this.txtTiempoCPU.getText() ,this.txtRAM.getText());
         new Dashboard().setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
