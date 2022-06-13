@@ -7,7 +7,9 @@ package GUI;
 import com.mycompany.obligatoriosistemasoperativos.*;
 import java.util.LinkedList;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -19,12 +21,15 @@ public class Dashboard extends javax.swing.JFrame {
     public static Scheduler scheduler;
     static DefaultTableModel modeloProcesos;
     static DefaultTableModel modeloNucleos;
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     /**
      * Creates new form Dashboard
      */
     public Dashboard() {
         initComponents();
+        setearModeloTablaNucelos();
+        setearModeloTablaProcesos();
     }
 
     /**
@@ -182,6 +187,8 @@ public class Dashboard extends javax.swing.JFrame {
         scheduler.Start();
         inicializarProcesosIniciales();
         cargarTablas();
+        final DashboardUpdate dashboardUpdate = new DashboardUpdate(this);
+        executor.scheduleAtFixedRate(dashboardUpdate, 1000, 1000, TimeUnit.MILLISECONDS);
     }//GEN-LAST:event_formWindowOpened
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
@@ -228,8 +235,6 @@ public class Dashboard extends javax.swing.JFrame {
             public void run() {
                 Dashboard pantalla = new Dashboard();
                 pantalla.setVisible(true);
-                DashboardUpdate dashboardUpdate = new DashboardUpdate(pantalla);
-                dashboardUpdate.start();
 
             }
         });
@@ -257,26 +262,40 @@ public class Dashboard extends javax.swing.JFrame {
             texto[0] = String.valueOf(nucleo.getCoreId());
             if (nucleo.getRunningPCB() == null) {
                 texto[1] = "vacio";
-            }
-            else
-            {
+            } else {
                 texto[1] = String.valueOf(nucleo.getRunningPCB().Program.Name);
             }
             modeloNucleos.addRow(texto);
         }
         modeloNucleos.fireTableDataChanged();
     }
-    
-    private void vaciarTablaNucleos() {
+
+    private void setearModeloTablaNucelos() {
         modeloNucleos = new DefaultTableModel();
         modeloNucleos.addColumn("ID Nucleo");
         modeloNucleos.addColumn("Proceso");
-       
-        this.tablaNucleos.setModel(modeloNucleos);
 
+        this.tablaNucleos.setModel(modeloNucleos);
+    }
+
+    private void setearModeloTablaProcesos() {
+        modeloProcesos = new DefaultTableModel();
+        modeloProcesos.addColumn("ID");
+        modeloProcesos.addColumn("Nombre");
+        modeloProcesos.addColumn("Estado");
+        modeloProcesos.addColumn("Prioridad");
+
+        //modeloProcesos.addColumn("RAM (MB)");
+        this.tablaProcesos.setModel(modeloProcesos);
+    }
+
+    private void vaciarTablaNucleos() {
+        for (int i = 0; i < tablaNucleos.getRowCount(); i++) {
+            modeloNucleos.removeRow(i);
+            i-=1;
+        }
     }
     
-
     private void cargarTablaProcesos() {
         vaciarTablaProcesos();
         String[] texto = new String[4];
@@ -292,17 +311,12 @@ public class Dashboard extends javax.swing.JFrame {
         }
         modeloProcesos.fireTableDataChanged();
     }
-
-    private void vaciarTablaProcesos() {
-        modeloProcesos = new DefaultTableModel();
-        modeloProcesos.addColumn("ID");
-        modeloProcesos.addColumn("Nombre");
-        modeloProcesos.addColumn("Estado");
-        modeloProcesos.addColumn("Prioridad");
-
-        //modeloProcesos.addColumn("RAM (MB)");
-        this.tablaProcesos.setModel(modeloProcesos);
-
+    
+        private void vaciarTablaProcesos() {
+        for (int i = 0; i < tablaProcesos.getRowCount(); i++) {
+            modeloProcesos.removeRow(i);
+            i-=1;
+        }
     }
 
     private void cargarProcesosArchivo() {

@@ -12,17 +12,17 @@ import java.util.LinkedList;
  *
  * @author nmais
  */
-public class DashboardUpdate extends Thread {
+public class DashboardUpdate implements Runnable {
 
     public Dashboard dashboard;
 
     public DashboardUpdate(Dashboard pDashboard) {
         dashboard = pDashboard;
     }
-
+    
+    @Override
     public void run() {
-        while (true) {
-            this.dashboard.cargarTablas();
-        }
+        
+        this.dashboard.cargarTablas();
     }
 }
