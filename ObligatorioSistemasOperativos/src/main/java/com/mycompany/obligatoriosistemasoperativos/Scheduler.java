@@ -248,10 +248,28 @@ public class Scheduler {
         return MemoryManager.GetMemoryUsage(this.memoryDescriptors);
     }
 
-    public Core[] getCores()
-    {
+    public Core[] getCores() {
         return this.cores;
     }
+
+    public void ProcessPriorityUpdate(int pPID, int pPriority) {
+        PCB process = this.GetProcess(pPID);
+        if (!this.running) {
+            throw new IllegalStateException("Scheduler is not running");
+        }
+        if (process == null) {
+            throw new IllegalArgumentException("Process cannot be null");
+        }
+        if (pPriority < 1 || pPriority > 99) {
+            throw new IllegalArgumentException("Priority must be between 1 and 99");
+        }
+        if(!this.processTable.contains(process))
+        {
+            throw new IllegalArgumentException("The process is not in the sistem");
+        }
+        process.Priority = pPriority;
+    }
+
     /*
      * Internal methods
      */
