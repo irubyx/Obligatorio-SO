@@ -266,10 +266,18 @@ public class Scheduler {
             throw new IllegalStateException("Scheduler is not running");
         }
 
-        for (int i = 0; i < cores.length; i++) {
-            if (this.cores[i].IsIdle()) {
-                this.Schedule(i);
+        try{
+            this.mutex.acquire();
+            try {
+                for (int i = 0; i < cores.length; i++) {
+                    if (this.cores[i].IsIdle()) {
+                        this.Schedule(i);
+                    }
+                }
+            } finally {
+                this.mutex.release();
             }
+        } catch (InterruptedException e) {
         }
     }
 
@@ -281,18 +289,9 @@ public class Scheduler {
             throw new IllegalArgumentException("Invalid core id");
         }
 
-        try {
-            this.mutex.acquire();
-            try {
-
-                PCB process = this.readyQueue.poll();
-                if (process != null) {
-                    this.cores[coreId].Dispatch(process, quantumMS);
-                }
-            } finally {
-                this.mutex.release();
-            }
-        } catch (InterruptedException e) {
+        PCB process = this.readyQueue.poll();
+        if (process != null) {
+            this.cores[coreId].Dispatch(process, quantumMS);
         }
     }
 
@@ -386,13 +385,13 @@ public class Scheduler {
                 process.State = ProcessState.Ready;
                 this.memoryDescriptors.add(process.Memory);
                 this.processTable.add(process);
+                this.EnqueueProcess(process);
             } finally {
                 this.mutex.release();
             }
         } catch (InterruptedException e) {
         }
 
-        this.EnqueueProcess(process);
         this.Schedule();
     }
 
@@ -407,21 +406,13 @@ public class Scheduler {
             throw new IllegalArgumentException("Process must be in Ready state");
         }
 
-        try {
-            this.mutex.acquire();
-            try {
-                for (int i = 0; i < this.readyQueue.size(); i++) {
-                    if (this.readyQueue.get(i).Priority > process.Priority) {
-                        this.readyQueue.add(i, process);
-                        return;
-                    }
-                }
-                this.readyQueue.add(process);
-            } finally {
-                this.mutex.release();
+        for (int i = 0; i < this.readyQueue.size(); i++) {
+            if (this.readyQueue.get(i).Priority > process.Priority) {
+                this.readyQueue.add(i, process);
+                return;
             }
-        } catch (InterruptedException e) {
         }
+        this.readyQueue.add(process);
     }
 
     private void KillProcess(PCB process) {
@@ -530,12 +521,12 @@ public class Scheduler {
                     Process.ioResponseFuture.cancel(true);
                 }
                 Process.State = ProcessState.Ready;
+                this.EnqueueProcess(Process);
             } finally {
                 this.mutex.release();
             }
         } catch (InterruptedException e) {
         }
-        this.EnqueueProcess(Process);
         this.Schedule();
     }
 
@@ -572,9 +563,18 @@ public class Scheduler {
     }
 
     void InterruptTimer(Core core) {
-        PCB process = core.Appropriate();
-        process.State = ProcessState.Ready;
-        this.EnqueueProcess(process);
+        try {
+            this.mutex.acquire();
+            try {
+                PCB process = core.Appropriate();
+                process.State = ProcessState.Ready;
+                this.EnqueueProcess(process);
+            } finally {
+                this.mutex.release();
+            }
+        } catch (InterruptedException e) {
+        }
+
         this.Schedule();
     }
 
@@ -596,13 +596,13 @@ public class Scheduler {
             try {
                 this.blockedProcesses.remove(process);
                 process.State = ProcessState.Ready;
+                this.EnqueueProcess(process);
             } finally {
                 this.mutex.release();
             }
         } catch (InterruptedException e) {
         }
 
-        this.EnqueueProcess(process);
         this.Schedule();
     }
 
