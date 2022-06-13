@@ -209,6 +209,7 @@ public class ModificarProceso extends javax.swing.JFrame {
 
     private void btnAceptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAceptarActionPerformed
         scheduler.ProcessPriorityUpdate(Integer.valueOf(txtIDProceso.getText()),Integer.valueOf(txtPrioridad.getText()));
+        this.setVisible(false);
     }//GEN-LAST:event_btnAceptarActionPerformed
 
     /**
