@@ -18,6 +18,7 @@ public class Dashboard extends javax.swing.JFrame {
 
     public static Scheduler scheduler;
     static DefaultTableModel modeloProcesos;
+    static DefaultTableModel modeloNucleos;
 
     /**
      * Creates new form Dashboard
@@ -36,7 +37,7 @@ public class Dashboard extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tablaNucleos = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         tablaProcesos = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
@@ -44,6 +45,7 @@ public class Dashboard extends javax.swing.JFrame {
         btnAgregar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
+        btnCargarArchivo = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -55,7 +57,7 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tablaNucleos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -66,7 +68,7 @@ public class Dashboard extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tablaNucleos);
 
         tablaProcesos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -96,10 +98,17 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        btnRefresh.setText("R");
+        btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRefreshActionPerformed(evt);
+            }
+        });
+
+        btnCargarArchivo.setText("Agregar Desde Archivo");
+        btnCargarArchivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCargarArchivoActionPerformed(evt);
             }
         });
 
@@ -109,22 +118,25 @@ public class Dashboard extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(17, 17, 17)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnAgregar, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnModificar)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(18, 18, 18)
+                                .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(btnAgregar, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnModificar)))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(53, 53, 53)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -147,7 +159,9 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAgregar)
                     .addComponent(btnModificar))
-                .addGap(101, 101, 101))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(59, 59, 59))
         );
 
         pack();
@@ -167,16 +181,20 @@ public class Dashboard extends javax.swing.JFrame {
         scheduler.BindHardware(hardware);
         scheduler.Start();
         inicializarProcesosIniciales();
-        cargarTabla();
+        cargarTablas();
     }//GEN-LAST:event_formWindowOpened
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
-        cargarTabla();
+        cargarTablas();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         new ModificarProceso().setVisible(true);
     }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarArchivoActionPerformed
+        cargarProcesosArchivo();
+    }//GEN-LAST:event_btnCargarArchivoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -210,7 +228,7 @@ public class Dashboard extends javax.swing.JFrame {
             public void run() {
                 Dashboard pantalla = new Dashboard();
                 pantalla.setVisible(true);
-                DashboardUpdate dashboardUpdate= new DashboardUpdate(pantalla);
+                DashboardUpdate dashboardUpdate = new DashboardUpdate(pantalla);
                 dashboardUpdate.start();
 
             }
@@ -226,12 +244,45 @@ public class Dashboard extends javax.swing.JFrame {
         scheduler.RunProgram(p3, 1, 0);
     }
 
-    public void cargarTabla() {
-        vaciarTabla();
+    public void cargarTablas() {
+        cargarTablaProcesos();
+        cargarTablaNucleos();
+    }
+
+    private void cargarTablaNucleos() {
+        vaciarTablaNucleos();
+        String[] texto = new String[2];
+        Core[] nucleos = scheduler.getCores();
+        for (Core nucleo : nucleos) {
+            texto[0] = String.valueOf(nucleo.getCoreId());
+            if (nucleo.getRunningPCB() == null) {
+                texto[1] = "vacio";
+            }
+            else
+            {
+                texto[1] = String.valueOf(nucleo.getRunningPCB().Program.Name);
+            }
+            modeloNucleos.addRow(texto);
+        }
+        modeloNucleos.fireTableDataChanged();
+    }
+    
+    private void vaciarTablaNucleos() {
+        modeloNucleos = new DefaultTableModel();
+        modeloNucleos.addColumn("ID Nucleo");
+        modeloNucleos.addColumn("Proceso");
+       
+        this.tablaNucleos.setModel(modeloNucleos);
+
+    }
+    
+
+    private void cargarTablaProcesos() {
+        vaciarTablaProcesos();
         String[] texto = new String[4];
         LinkedList<ProcessDetail> procesos = scheduler.GetAllProcesses();
         //LinkedList<PCB> procesos =scheduler.GetProcesses(); 
-        for (ProcessDetail p :procesos ) {
+        for (ProcessDetail p : procesos) {
             texto[0] = String.valueOf(p.PID);
             texto[1] = String.valueOf(p.Name);
             texto[2] = String.valueOf(p.State);
@@ -242,7 +293,7 @@ public class Dashboard extends javax.swing.JFrame {
         modeloProcesos.fireTableDataChanged();
     }
 
-    private void vaciarTabla() {
+    private void vaciarTablaProcesos() {
         modeloProcesos = new DefaultTableModel();
         modeloProcesos.addColumn("ID");
         modeloProcesos.addColumn("Nombre");
@@ -254,15 +305,26 @@ public class Dashboard extends javax.swing.JFrame {
 
     }
 
+    private void cargarProcesosArchivo() {
+        String[] lineas = ManejadorArchivosGenerico.leerArchivo("src/procesos.txt");
+        for (int i = 1; i < lineas.length; i++) //La linea 0 tiene la estructura a seguir
+        {
+            String[] partesProceso = lineas[i].split(",");
+            Program prog = new Program(partesProceso[0], Integer.valueOf(partesProceso[1]), Integer.valueOf(partesProceso[2]), Integer.valueOf(partesProceso[3]), Integer.valueOf(partesProceso[4]));
+            scheduler.RunProgram(prog, Integer.valueOf(partesProceso[5]), Integer.valueOf(partesProceso[6]));
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregar;
+    private javax.swing.JButton btnCargarArchivo;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable tablaNucleos;
     private javax.swing.JTable tablaProcesos;
     // End of variables declaration//GEN-END:variables
 }

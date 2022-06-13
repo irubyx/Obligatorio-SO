@@ -248,6 +248,10 @@ public class Scheduler {
         return MemoryManager.GetMemoryUsage(this.memoryDescriptors);
     }
 
+    public Core[] getCores()
+    {
+        return this.cores;
+    }
     /*
      * Internal methods
      */

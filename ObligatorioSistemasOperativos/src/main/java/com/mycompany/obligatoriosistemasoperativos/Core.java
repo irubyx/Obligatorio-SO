@@ -121,4 +121,14 @@ public class Core {
             super.scheduler.InterruptCompletion(super.core);
         }
     }
+    
+    public int getCoreId()
+    {
+        return this.CoreID;
+    }
+    
+    public PCB getRunningPCB()
+    {
+        return this.RunningProcess;
+    }
 }

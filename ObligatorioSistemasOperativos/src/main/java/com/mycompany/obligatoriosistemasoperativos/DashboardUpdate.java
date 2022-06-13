@@ -22,7 +22,7 @@ public class DashboardUpdate extends Thread {
 
     public void run() {
         while (true) {
-            this.dashboard.cargarTabla();
+            this.dashboard.cargarTablas();
         }
     }
 }
