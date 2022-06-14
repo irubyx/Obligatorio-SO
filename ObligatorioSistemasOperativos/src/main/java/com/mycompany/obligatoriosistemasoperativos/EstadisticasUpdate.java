@@ -4,22 +4,22 @@
  */
 package com.mycompany.obligatoriosistemasoperativos;
 
-import GUI.Dashboard;
+import GUI.Estadisticas;
+
 /**
  *
  * @author nmais
  */
-public class DashboardUpdate implements Runnable {
+public class EstadisticasUpdate implements Runnable {
+    public Estadisticas estadisticas;
 
-    public Dashboard dashboard;
-
-    public DashboardUpdate(Dashboard pDashboard) {
-        dashboard = pDashboard;
+    public EstadisticasUpdate(Estadisticas pEstadistica) {
+        estadisticas = pEstadistica;
     }
     
     @Override
     public void run() {
-        
-        this.dashboard.cargarTablas();
+        this.estadisticas.cargarTablas();
+        this.estadisticas.cargarMemoria();
     }
 }
