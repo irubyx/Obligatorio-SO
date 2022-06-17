@@ -81,6 +81,7 @@ public class Dashboard extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tablaNucleos);
 
+        tablaProcesos.setBackground(new java.awt.Color(215, 247, 253));
         tablaProcesos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
