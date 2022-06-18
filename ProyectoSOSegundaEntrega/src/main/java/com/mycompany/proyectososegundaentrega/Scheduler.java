@@ -1,4 +1,4 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.proyectososegundaentrega;
 
 import java.util.LinkedList;
 import java.util.Queue;

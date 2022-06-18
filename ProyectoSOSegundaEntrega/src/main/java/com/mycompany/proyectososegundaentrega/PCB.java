@@ -1,4 +1,4 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.proyectososegundaentrega;
 
 import java.io.Serializable;
 import java.util.LinkedList;

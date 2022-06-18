@@ -1,4 +1,4 @@
-package com.mycompany.obligatoriosistemasoperativos;
+package com.mycompany.proyectososegundaentrega;
 
 public class SchedulingData {
     long RemainingTimeTillTermination;
