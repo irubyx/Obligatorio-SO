@@ -73,7 +73,6 @@ public class Estadisticas extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(700, 500));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
@@ -94,7 +93,7 @@ public class Estadisticas extends javax.swing.JFrame {
 
         jLabel7.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(196, 233, 233));
-        jLabel7.setText("en uso:");
+        jLabel7.setText("RAM en uso:");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -380,12 +379,11 @@ public class Estadisticas extends javax.swing.JFrame {
 
     public void cargarMemoria() {
         StringBuilder texto = new StringBuilder();
-        //Hardware hardware = Hardware.getInstance();   
         VirtualMemory memoriaVirtual = scheduler.getVirtualMemory();       
         long memoriaSinUsar = memoriaVirtual.FreeFrames.size()*4096;
-        double totalMemoria = memoriaVirtual.GetFrameCount() * memoriaVirtual.GetFrameSize();
-        double porcentajeSinUsar = (memoriaSinUsar*100) / totalMemoria;
-        double porcentajeUsado = 100 - porcentajeSinUsar;
+        long totalMemoria = memoriaVirtual.GetFrameCount() * memoriaVirtual.GetFrameSize();
+        long porcentajeSinUsar = (memoriaSinUsar*100) / totalMemoria;
+        long porcentajeUsado = 100 - porcentajeSinUsar;
         texto.append(String.valueOf(porcentajeUsado));
         texto.append("%");
         this.txtMemoria.setText(texto.toString());
