@@ -6,7 +6,7 @@ public class VirtualMemory {
     static final int DEFAULT_FRAME_SIZE = 4096;
 
     public final LinkedList<Integer> FreeFrames;
-    
+        
     int FrameSize;
     int FrameCount;
     int PageSize;

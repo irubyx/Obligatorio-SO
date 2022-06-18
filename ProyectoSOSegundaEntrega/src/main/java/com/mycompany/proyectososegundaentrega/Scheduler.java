@@ -247,6 +247,11 @@ public class Scheduler {
 
         return MemoryManager.GetMemoryUsage(this.memoryDescriptors);
     }
+    
+    public VirtualMemory getVirtualMemory()
+    {
+        return this.virtualMemory;
+    }
 
     public Core[] getCores() {
         return this.cores;

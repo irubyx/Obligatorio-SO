@@ -380,11 +380,13 @@ public class Estadisticas extends javax.swing.JFrame {
 
     public void cargarMemoria() {
         StringBuilder texto = new StringBuilder();
-        Hardware hardware = Hardware.getInstance();
-        int totalRam = hardware.GetRAMSize();
-        int usoMemoria = scheduler.GetMemoryUsage();
-        int por = (usoMemoria * 100) / totalRam;
-        texto.append(String.valueOf(por));
+        //Hardware hardware = Hardware.getInstance();   
+        VirtualMemory memoriaVirtual = scheduler.getVirtualMemory();       
+        long memoriaSinUsar = memoriaVirtual.FreeFrames.size()*4096;
+        double totalMemoria = memoriaVirtual.GetFrameCount() * memoriaVirtual.GetFrameSize();
+        double porcentajeSinUsar = (memoriaSinUsar*100) / totalMemoria;
+        double porcentajeUsado = 100 - porcentajeSinUsar;
+        texto.append(String.valueOf(porcentajeUsado));
         texto.append("%");
         this.txtMemoria.setText(texto.toString());
     }
