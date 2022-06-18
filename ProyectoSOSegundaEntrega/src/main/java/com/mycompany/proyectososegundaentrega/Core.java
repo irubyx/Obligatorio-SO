@@ -23,6 +23,7 @@ public class Core {
         this.RunningProcess.SchedulingData.CalculateNextBurst(timeSliceMS);
         this.RunningProcess.SchedulingData.assignedCore = this.CoreID;
         this.RunningProcess.State = ProcessState.Running;
+        MemoryManager.AccessPages(this.RunningProcess);
         this.RestoreContext();
 
         switch (this.RunningProcess.SchedulingData.NextBurstType) {
