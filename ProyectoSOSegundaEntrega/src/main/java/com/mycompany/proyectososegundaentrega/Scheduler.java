@@ -314,6 +314,7 @@ public class Scheduler {
 
         PCB process = this.readyQueue.poll();
         if (process != null) {
+            MemoryManager.AllocateMemory(process, memoryDescriptors, virtualMemory);
             this.cores[coreId].Dispatch(process, quantumMS);
         }
     }

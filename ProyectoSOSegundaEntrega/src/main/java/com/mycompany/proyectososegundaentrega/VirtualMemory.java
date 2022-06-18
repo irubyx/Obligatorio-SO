@@ -14,11 +14,11 @@ public class VirtualMemory {
     long VMSize;
     long RAMSize;
 
-    public VirtualMemory(int ramSize) {
+    public VirtualMemory(long ramSize) {
         this.RAMSize = ramSize;
         this.VMSize = DEFAULT_FRAME_SIZE * 1024 * 1024;
         this.FrameSize = DEFAULT_FRAME_SIZE;
-        this.FrameCount = ramSize / this.FrameSize;
+        this.FrameCount = (int)(ramSize / this.FrameSize);
         this.PageSize = this.FrameSize;
         this.PageCount = this.VMSize / this.PageSize;
         this.FreeFrames = new LinkedList<>();

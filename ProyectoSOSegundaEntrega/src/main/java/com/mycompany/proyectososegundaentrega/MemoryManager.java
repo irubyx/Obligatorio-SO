@@ -2,6 +2,7 @@ package com.mycompany.proyectososegundaentrega;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 
 class MemoryManager {
     static void NewProcessArea(PCB process, int size) {
@@ -96,5 +97,58 @@ class MemoryManager {
         }
 
         return memoryUsage;
+    }
+
+    static void AllocateMemory(PCB process, LinkedList<MemoryDescriptor> descriptors, VirtualMemory vm) {
+        LinkedList<PageTableEntry> pages = new LinkedList<PageTableEntry>();
+        for (MemoryArea area : process.Memory.Areas) {
+            pages.addAll(GetAreaRequiredPages(process, area));
+        }
+
+        for (PageTableEntry page : pages) {
+            if (!page.Valid) {
+                try {
+                    int frame = RequestFrame(vm);
+                    page.FrameNumber = frame;
+                    page.Valid = true;
+                } catch (IllegalStateException e) {
+                    int frame = SwapPage(descriptors);
+                    page.FrameNumber = frame;
+                    page.Valid = true;
+                }
+            }
+        }
+    }
+
+    static int SwapPage(LinkedList<MemoryDescriptor> descriptors) {
+        LinkedList<PageTableEntry> candidates = new LinkedList<PageTableEntry>();
+        
+        for (MemoryDescriptor descriptor : descriptors) {
+            for (int i = 0; i < 1024; i++) {
+                for (int j = 0; j < 1024; j++) {
+                    if (descriptor.PageTable[i][j].Valid) {
+                        if (descriptor.PageTable[i][j].GetAccesses() == 0) {
+                            candidates.add(descriptor.PageTable[i][j]);
+                            candidates.add(descriptor.PageTable[i][j]);
+                        }
+                        else if (descriptor.PageTable[i][j].GetAccesses() == 1) {
+                            candidates.add(descriptor.PageTable[i][j]);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (candidates.isEmpty()) {
+            throw new IllegalStateException("No free frames");
+        }
+        else {
+            Random random = new Random();
+            PageTableEntry page = candidates.get(random.nextInt(candidates.size()));
+            int frame = page.FrameNumber;
+            page.Valid = false;
+            page.FrameNumber = 0;
+            return frame;
+        }
     }
 }
