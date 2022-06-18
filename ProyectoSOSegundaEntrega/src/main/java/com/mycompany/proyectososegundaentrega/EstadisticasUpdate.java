@@ -19,7 +19,7 @@ public class EstadisticasUpdate implements Runnable {
     
     @Override
     public void run() {
-        this.estadisticas.cargarTablas();
-        this.estadisticas.cargarMemoria();
+        //this.estadisticas.cargarTablas();
+        //this.estadisticas.cargarMemoria();
     }
 }

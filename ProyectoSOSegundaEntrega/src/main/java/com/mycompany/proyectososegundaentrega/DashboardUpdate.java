@@ -20,6 +20,6 @@ public class DashboardUpdate implements Runnable {
     @Override
     public void run() {
         
-        this.dashboard.cargarTablas();
+        //this.dashboard.cargarTablas();
     }
 }
