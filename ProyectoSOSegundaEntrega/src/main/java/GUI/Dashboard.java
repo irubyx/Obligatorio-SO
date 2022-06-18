@@ -20,27 +20,27 @@ import javax.swing.table.DefaultTableModel;
  * @author nmais
  */
 public class Dashboard extends javax.swing.JFrame {
+
     public static Scheduler scheduler;
     static DefaultTableModel modeloProcesos;
     static DefaultTableModel modeloNucleos;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    
+
     /**
      * Creates new form Dashboard
      */
     public Dashboard() {
         initComponents();
         setearModeloTablaNucelos();
-        setearModeloTablaProcesos(); 
-        
+        setearModeloTablaProcesos();
+
         /*
         
         tablaProcesos.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
         tablaProcesos.getTableHeader().setOpaque(false);
         tablaProcesos.getTableHeader().setBackground(Color.black);
         tablaProcesos.getTableHeader().setForeground(new Color(0,51,51));
-        */
-
+         */
     }
 
     /**
@@ -95,6 +95,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         tablaNucleos.setBackground(new java.awt.Color(0, 102, 102));
         tablaNucleos.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
+        tablaNucleos.setForeground(new java.awt.Color(255, 255, 255));
         tablaNucleos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -125,6 +126,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         tablaProcesos.setBackground(new java.awt.Color(0, 102, 102));
         tablaProcesos.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
+        tablaProcesos.setForeground(new java.awt.Color(255, 255, 255));
         tablaProcesos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -159,10 +161,10 @@ public class Dashboard extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(23, 23, 23)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 306, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(16, 16, 16))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -332,11 +334,13 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_estadisticasMenuActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-    scheduler = Scheduler.GetInstance();
+        scheduler = Scheduler.GetInstance();
         Hardware hardware = Hardware.getInstance();
-        scheduler.BindHardware(hardware);
-        scheduler.Start();
-        inicializarProcesosIniciales();
+        if (hardware != scheduler.getHardware()) {
+            scheduler.BindHardware(hardware);
+            scheduler.Start();
+            inicializarProcesosIniciales();
+        }
         cargarTablas();
         final DashboardUpdate dashboardUpdate = new DashboardUpdate(this);
         executor.scheduleAtFixedRate(dashboardUpdate, 1000, 1000, TimeUnit.MILLISECONDS);    }//GEN-LAST:event_formWindowOpened
@@ -372,13 +376,11 @@ public class Dashboard extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Dashboard().setVisible(true);
-                
 
-                
             }
         });
     }
-    
+
     private static void inicializarProcesosIniciales() {
         Program p1 = new Program("System", 0, 50, 10, 13);
         Program p2 = new Program("Secure System", 0, 100, 20, 20);
@@ -392,7 +394,7 @@ public class Dashboard extends javax.swing.JFrame {
         cargarTablaProcesos();
         cargarTablaNucleos();
     }
-    
+
     private void setearModeloTablaNucelos() {
         modeloNucleos = new DefaultTableModel();
         setearEstilo(tablaNucleos);
@@ -413,16 +415,15 @@ public class Dashboard extends javax.swing.JFrame {
         //modeloProcesos.addColumn("RAM (MB)");
         this.tablaProcesos.setModel(modeloProcesos);
     }
-    
-    private void setearEstilo(JTable pTalba)
-    {
-        pTalba.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
+
+    private void setearEstilo(JTable pTalba) {
+        pTalba.getTableHeader().setFont(new Font("Lucida Sans", Font.BOLD, 14));
         pTalba.getTableHeader().setOpaque(false);
         pTalba.getTableHeader().setBackground(Color.black);
-        pTalba.getTableHeader().setForeground(new Color(0,51,51));
-        UIManager.put("nimbusBlueGrey", new Color(215,235,235));
+        pTalba.getTableHeader().setForeground(new Color(0, 51, 51));
+        UIManager.put("nimbusBlueGrey", new Color(215, 235, 235));
     }
-    
+
     private void cargarProcesosArchivo() {
         String[] lineas = ManejadorArchivosGenerico.leerArchivo("src/procesos.txt");
         for (int i = 1; i < lineas.length; i++) //La linea 0 tiene la estructura a seguir
@@ -432,8 +433,8 @@ public class Dashboard extends javax.swing.JFrame {
             scheduler.RunProgram(prog, Integer.valueOf(partesProceso[5]), Integer.valueOf(partesProceso[6]));
         }
     }
-    
-     private void cargarTablaNucleos() {
+
+    private void cargarTablaNucleos() {
         vaciarTablaNucleos();
         String[] texto = new String[2];
         Core[] nucleos = scheduler.getCores();
@@ -449,7 +450,7 @@ public class Dashboard extends javax.swing.JFrame {
         modeloNucleos.fireTableDataChanged();
     }
 
-     private void vaciarTablaNucleos() {
+    private void vaciarTablaNucleos() {
         for (int i = 0; i < tablaNucleos.getRowCount(); i++) {
             modeloNucleos.removeRow(i);
             i -= 1;

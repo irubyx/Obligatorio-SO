@@ -4,9 +4,16 @@
  */
 package GUI;
 
+import com.mycompany.proyectososegundaentrega.*;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.LinkedList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import javax.swing.JTable;
 import javax.swing.UIManager;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -14,20 +21,17 @@ import javax.swing.UIManager;
  */
 public class Estadisticas extends javax.swing.JFrame {
 
+    public static Scheduler scheduler;
+    static DefaultTableModel modeloProcesosListos;
+    static DefaultTableModel modeloProcesosBloqueados;
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
     /**
      * Creates new form Estadisticas
      */
     public Estadisticas() {
         initComponents();
-        tabla3.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
-        tabla3.getTableHeader().setOpaque(false);
-        tabla3.getTableHeader().setBackground(Color.black);
-        tabla3.getTableHeader().setForeground(new Color(0,51,51));
-        UIManager.put("nimbusBlueGrey", new Color(215,235,235));
-        tabla4.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
-        tabla4.getTableHeader().setOpaque(false);
-        tabla4.getTableHeader().setBackground(Color.black);
-        tabla4.getTableHeader().setForeground(new Color(0,51,51));
+        setearModeloTablas();
     }
 
     /**
@@ -46,13 +50,16 @@ public class Estadisticas extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        tabla4 = new javax.swing.JTable();
+        tablaBloqueados = new javax.swing.JTable();
         jScrollPane4 = new javax.swing.JScrollPane();
-        tabla3 = new javax.swing.JTable();
+        tablaListos = new javax.swing.JTable();
         jLabel5 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        dashboardMenu = new javax.swing.JMenu();
+        estadisticasMenu = new javax.swing.JMenu();
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -67,9 +74,13 @@ public class Estadisticas extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(700, 500));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         jPanel1.setBackground(new java.awt.Color(215, 235, 235));
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel2.setBackground(new java.awt.Color(109, 172, 167));
 
@@ -114,11 +125,9 @@ public class Estadisticas extends javax.swing.JFrame {
                 .addContainerGap(243, Short.MAX_VALUE))
         );
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 0, 190, 490));
-
-        tabla4.setBackground(new java.awt.Color(0, 102, 102));
-        tabla4.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
-        tabla4.setModel(new javax.swing.table.DefaultTableModel(
+        tablaBloqueados.setBackground(new java.awt.Color(0, 102, 102));
+        tablaBloqueados.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
+        tablaBloqueados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -137,20 +146,18 @@ public class Estadisticas extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tabla4.setFocusable(false);
-        tabla4.setGridColor(new java.awt.Color(83, 141, 141));
-        tabla4.setRowHeight(30);
-        tabla4.setSelectionBackground(new java.awt.Color(255, 204, 102));
-        tabla4.setSelectionForeground(new java.awt.Color(255, 153, 0));
-        tabla4.setShowHorizontalLines(true);
-        tabla4.getTableHeader().setReorderingAllowed(false);
-        jScrollPane2.setViewportView(tabla4);
+        tablaBloqueados.setFocusable(false);
+        tablaBloqueados.setGridColor(new java.awt.Color(83, 141, 141));
+        tablaBloqueados.setRowHeight(30);
+        tablaBloqueados.setSelectionBackground(new java.awt.Color(255, 204, 102));
+        tablaBloqueados.setSelectionForeground(new java.awt.Color(255, 153, 0));
+        tablaBloqueados.setShowHorizontalLines(true);
+        tablaBloqueados.getTableHeader().setReorderingAllowed(false);
+        jScrollPane2.setViewportView(tablaBloqueados);
 
-        jPanel1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 110, 230, 290));
-
-        tabla3.setBackground(new java.awt.Color(0, 102, 102));
-        tabla3.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
-        tabla3.setModel(new javax.swing.table.DefaultTableModel(
+        tablaListos.setBackground(new java.awt.Color(0, 102, 102));
+        tablaListos.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
+        tablaListos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -169,36 +176,105 @@ public class Estadisticas extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tabla3.setFocusable(false);
-        tabla3.setGridColor(new java.awt.Color(83, 141, 141));
-        tabla3.setRowHeight(30);
-        tabla3.setSelectionBackground(new java.awt.Color(255, 204, 102));
-        tabla3.setSelectionForeground(new java.awt.Color(255, 153, 0));
-        tabla3.setShowHorizontalLines(true);
-        tabla3.getTableHeader().setReorderingAllowed(false);
-        jScrollPane4.setViewportView(tabla3);
-
-        jPanel1.add(jScrollPane4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 230, 290));
+        tablaListos.setFocusable(false);
+        tablaListos.setGridColor(new java.awt.Color(83, 141, 141));
+        tablaListos.setRowHeight(30);
+        tablaListos.setSelectionBackground(new java.awt.Color(255, 204, 102));
+        tablaListos.setSelectionForeground(new java.awt.Color(255, 153, 0));
+        tablaListos.setShowHorizontalLines(true);
+        tablaListos.getTableHeader().setReorderingAllowed(false);
+        jScrollPane4.setViewportView(tablaListos);
 
         jLabel5.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(0, 102, 102));
         jLabel5.setText("Bloqueados");
-        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 60, 180, 40));
 
         jLabel4.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 153, 102));
         jLabel4.setText("Bloqueados");
-        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 70, 180, 40));
 
         jLabel6.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(0, 102, 102));
         jLabel6.setText("Listos");
-        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 180, 40));
 
         jLabel3.setFont(new java.awt.Font("Lucida Sans", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 153, 102));
         jLabel3.setText("Listos");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 180, 20));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(30, 30, 30)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(20, 20, 20)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(60, 60, 60)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(10, 10, 10)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE))))
+        );
+
+        jMenuBar1.setBackground(new java.awt.Color(0, 51, 51));
+        jMenuBar1.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
+
+        dashboardMenu.setText("Dashboard");
+        dashboardMenu.setFont(new java.awt.Font("Lucida Sans", 0, 12)); // NOI18N
+        dashboardMenu.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                dashboardMenuMouseClicked(evt);
+            }
+        });
+        dashboardMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dashboardMenuActionPerformed(evt);
+            }
+        });
+        jMenuBar1.add(dashboardMenu);
+
+        estadisticasMenu.setForeground(new java.awt.Color(0, 51, 51));
+        estadisticasMenu.setText("Estadisticas");
+        estadisticasMenu.setFont(new java.awt.Font("Lucida Sans", 0, 12)); // NOI18N
+        estadisticasMenu.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                estadisticasMenuMouseClicked(evt);
+            }
+        });
+        estadisticasMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                estadisticasMenuActionPerformed(evt);
+            }
+        });
+        jMenuBar1.add(estadisticasMenu);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -208,11 +284,37 @@ public class Estadisticas extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 475, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        scheduler = Scheduler.GetInstance();
+        cargarTablas();
+        final EstadisticasUpdate estadisticasUpdate = new EstadisticasUpdate(this);
+        executor.scheduleAtFixedRate(estadisticasUpdate, 1000, 1000, TimeUnit.MILLISECONDS);    }//GEN-LAST:event_formWindowOpened
+
+    private void dashboardMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashboardMenuActionPerformed
+        this.setVisible(false);
+        new Dashboard().setVisible(true);
+    }//GEN-LAST:event_dashboardMenuActionPerformed
+
+    private void estadisticasMenuMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_estadisticasMenuMouseClicked
+
+    }//GEN-LAST:event_estadisticasMenuMouseClicked
+
+    private void estadisticasMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_estadisticasMenuActionPerformed
+        
+    }//GEN-LAST:event_estadisticasMenuActionPerformed
+
+    private void dashboardMenuMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dashboardMenuMouseClicked
+        this.setVisible(false);
+        new Dashboard().setVisible(true);
+    }//GEN-LAST:event_dashboardMenuMouseClicked
 
     /**
      * @param args the command line arguments
@@ -249,20 +351,101 @@ public class Estadisticas extends javax.swing.JFrame {
         });
     }
 
+    public void cargarTablas() {
+        cargarTablaListos();
+        cargarTablaBloqueados();
+    }
+
+    private void setearModeloTablas() {
+        modeloProcesosListos = new DefaultTableModel();
+        setearEstilo(tablaListos);
+        modeloProcesosListos.addColumn("ID");
+        modeloProcesosListos.addColumn("Proceso");
+        modeloProcesosBloqueados = new DefaultTableModel();
+        setearEstilo(tablaBloqueados);
+        modeloProcesosBloqueados.addColumn("ID");
+        modeloProcesosBloqueados.addColumn("Proceso");
+
+        this.tablaListos.setModel(modeloProcesosListos);
+        this.tablaBloqueados.setModel(modeloProcesosBloqueados);
+    }
+
+    private void setearEstilo(JTable tabla) {
+        tabla.getTableHeader().setFont(new Font("Lucida Sans", Font.BOLD, 14));
+        tabla.getTableHeader().setOpaque(false);
+        tabla.getTableHeader().setBackground(Color.black);
+        tabla.getTableHeader().setForeground(new Color(0, 51, 51));
+        UIManager.put("nimbusBlueGrey", new Color(215, 235, 235));
+    }
+
+    public void cargarMemoria() {
+        StringBuilder texto = new StringBuilder();
+        Hardware hardware = Hardware.getInstance();
+        int totalRam = hardware.GetRAMSize();
+        int usoMemoria = scheduler.GetMemoryUsage();
+        int por = (usoMemoria * 100) / totalRam;
+        texto.append(String.valueOf(por));
+        texto.append("%");
+        this.txtMemoria.setText(texto.toString());
+    }
+
+    private void cargarTablaListos() {
+        vaciarTablaProcesosListos();
+        String[] texto = new String[2];
+        LinkedList listos = scheduler.GetReadyQueue();
+        for (Object proceso : listos) {
+            ProcessDetail process = (ProcessDetail) proceso;
+            texto[0] = String.valueOf(process.PID);
+            texto[1] = String.valueOf(process.Name);
+            modeloProcesosListos.addRow(texto);
+        }
+        modeloProcesosListos.fireTableDataChanged();
+    }
+
+    private void vaciarTablaProcesosListos() {
+        for (int i = 0; i < tablaListos.getRowCount(); i++) {
+            modeloProcesosListos.removeRow(i);
+            i -= 1;
+        }
+    }
+
+    private void cargarTablaBloqueados() {
+        vaciarTablaProcesosBloqueados();
+        String[] texto = new String[2];
+        LinkedList bloqueados = scheduler.GetBlockedProcesses();
+        for (Object proceso : bloqueados) {
+            ProcessDetail process = (ProcessDetail) proceso;
+            texto[0] = String.valueOf(process.PID);
+            texto[1] = String.valueOf(process.Name);
+            modeloProcesosBloqueados.addRow(texto);
+        }
+        modeloProcesosBloqueados.fireTableDataChanged();
+    }
+
+    private void vaciarTablaProcesosBloqueados() {
+        for (int i = 0; i < tablaBloqueados.getRowCount(); i++) {
+            modeloProcesosBloqueados.removeRow(i);
+            i -= 1;
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu dashboardMenu;
+    private javax.swing.JMenu estadisticasMenu;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JTable tabla3;
-    private javax.swing.JTable tabla4;
+    private javax.swing.JTable tablaBloqueados;
+    private javax.swing.JTable tablaListos;
     private javax.swing.JLabel txtMemoria;
     // End of variables declaration//GEN-END:variables
 }

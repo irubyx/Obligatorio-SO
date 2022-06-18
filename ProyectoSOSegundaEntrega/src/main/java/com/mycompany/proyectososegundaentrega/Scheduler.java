@@ -269,6 +269,11 @@ public class Scheduler {
         }
         process.Priority = pPriority;
     }
+    
+    public Hardware getHardware()
+    {
+        return this.hardware;
+    }
 
     /*
      * Internal methods
