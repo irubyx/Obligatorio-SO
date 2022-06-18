@@ -4,31 +4,42 @@
  */
 package GUI;
 
+import com.mycompany.proyectososegundaentrega.*;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.LinkedList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import javax.swing.JTable;
 import javax.swing.UIManager;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author nmais
  */
 public class Dashboard extends javax.swing.JFrame {
-
+    public static Scheduler scheduler;
+    static DefaultTableModel modeloProcesos;
+    static DefaultTableModel modeloNucleos;
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    
     /**
      * Creates new form Dashboard
      */
     public Dashboard() {
         initComponents();
-        tabla1.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
-        tabla1.getTableHeader().setOpaque(false);
-        tabla1.getTableHeader().setBackground(Color.black);
-        tabla1.getTableHeader().setForeground(new Color(0,51,51));
-        UIManager.put("nimbusBlueGrey", new Color(215,235,235));
-        tabla2.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
-        tabla2.getTableHeader().setOpaque(false);
-        tabla2.getTableHeader().setBackground(Color.black);
-        tabla2.getTableHeader().setForeground(new Color(0,51,51));
-        //tabla1.getTableHeader().se
+        setearModeloTablaNucelos();
+        setearModeloTablaProcesos(); 
+        
+        /*
+        
+        tablaProcesos.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
+        tablaProcesos.getTableHeader().setOpaque(false);
+        tablaProcesos.getTableHeader().setBackground(Color.black);
+        tablaProcesos.getTableHeader().setForeground(new Color(0,51,51));
+        */
 
     }
 
@@ -46,14 +57,14 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tabla1 = new javax.swing.JTable();
+        tablaNucleos = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
-        tabla2 = new javax.swing.JTable();
+        tablaProcesos = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        btnCargarArchivo = new javax.swing.JButton();
+        btnAgregar = new javax.swing.JButton();
+        btnModificar = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         dashboardMenu = new javax.swing.JMenu();
         estadisticasMenu = new javax.swing.JMenu();
@@ -72,15 +83,19 @@ public class Dashboard extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         jPanel1.setBackground(new java.awt.Color(215, 235, 235));
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel2.setBackground(new java.awt.Color(109, 172, 167));
 
-        tabla1.setBackground(new java.awt.Color(0, 102, 102));
-        tabla1.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
-        tabla1.setModel(new javax.swing.table.DefaultTableModel(
+        tablaNucleos.setBackground(new java.awt.Color(0, 102, 102));
+        tablaNucleos.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
+        tablaNucleos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -99,18 +114,18 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tabla1.setFocusable(false);
-        tabla1.setGridColor(new java.awt.Color(84, 147, 147));
-        tabla1.setRowHeight(30);
-        tabla1.setSelectionBackground(new java.awt.Color(255, 204, 102));
-        tabla1.setSelectionForeground(new java.awt.Color(255, 153, 0));
-        tabla1.setShowHorizontalLines(true);
-        tabla1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(tabla1);
+        tablaNucleos.setFocusable(false);
+        tablaNucleos.setGridColor(new java.awt.Color(84, 147, 147));
+        tablaNucleos.setRowHeight(30);
+        tablaNucleos.setSelectionBackground(new java.awt.Color(255, 204, 102));
+        tablaNucleos.setSelectionForeground(new java.awt.Color(255, 153, 0));
+        tablaNucleos.setShowHorizontalLines(true);
+        tablaNucleos.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(tablaNucleos);
 
-        tabla2.setBackground(new java.awt.Color(0, 102, 102));
-        tabla2.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
-        tabla2.setModel(new javax.swing.table.DefaultTableModel(
+        tablaProcesos.setBackground(new java.awt.Color(0, 102, 102));
+        tablaProcesos.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
+        tablaProcesos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -129,14 +144,14 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tabla2.setFocusable(false);
-        tabla2.setGridColor(new java.awt.Color(83, 141, 141));
-        tabla2.setRowHeight(30);
-        tabla2.setSelectionBackground(new java.awt.Color(255, 204, 102));
-        tabla2.setSelectionForeground(new java.awt.Color(255, 153, 0));
-        tabla2.setShowHorizontalLines(true);
-        tabla2.getTableHeader().setReorderingAllowed(false);
-        jScrollPane2.setViewportView(tabla2);
+        tablaProcesos.setFocusable(false);
+        tablaProcesos.setGridColor(new java.awt.Color(83, 141, 141));
+        tablaProcesos.setRowHeight(30);
+        tablaProcesos.setSelectionBackground(new java.awt.Color(255, 204, 102));
+        tablaProcesos.setSelectionForeground(new java.awt.Color(255, 153, 0));
+        tablaProcesos.setShowHorizontalLines(true);
+        tablaProcesos.getTableHeader().setReorderingAllowed(false);
+        jScrollPane2.setViewportView(tablaProcesos);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -156,62 +171,90 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 306, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 306, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
-
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 730, 340));
 
         jLabel1.setFont(new java.awt.Font("Lucida Sans", 1, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 102, 102));
         jLabel1.setText("Núcleos");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 20, -1, -1));
 
         jLabel3.setFont(new java.awt.Font("Lucida Sans", 1, 24)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(0, 102, 102));
         jLabel3.setText("Procesos");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 20, 180, 40));
 
-        jButton2.setFont(new java.awt.Font("Lucida Sans", 1, 14)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(0, 102, 102));
-        jButton2.setText("Agregar desde archivo");
-        jButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 204, 102), new java.awt.Color(255, 102, 51), new java.awt.Color(250, 165, 108), new java.awt.Color(255, 153, 102)));
-        jButton2.setFocusTraversalPolicyProvider(true);
-        jButton2.setMargin(new java.awt.Insets(2, 89, 2, 14));
-        jButton2.setMinimumSize(new java.awt.Dimension(70, 89));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnCargarArchivo.setFont(new java.awt.Font("Lucida Sans", 1, 14)); // NOI18N
+        btnCargarArchivo.setForeground(new java.awt.Color(0, 102, 102));
+        btnCargarArchivo.setText("Agregar desde archivo");
+        btnCargarArchivo.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 204, 102), new java.awt.Color(255, 102, 51), new java.awt.Color(250, 165, 108), new java.awt.Color(255, 153, 102)));
+        btnCargarArchivo.setFocusTraversalPolicyProvider(true);
+        btnCargarArchivo.setMargin(new java.awt.Insets(2, 89, 2, 14));
+        btnCargarArchivo.setMinimumSize(new java.awt.Dimension(70, 89));
+        btnCargarArchivo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnCargarArchivoActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 450, 220, 30));
 
-        jButton3.setFont(new java.awt.Font("Lucida Sans", 1, 14)); // NOI18N
-        jButton3.setForeground(new java.awt.Color(0, 102, 102));
-        jButton3.setText("Agregar");
-        jButton3.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 204, 102), new java.awt.Color(255, 102, 51), new java.awt.Color(250, 165, 108), new java.awt.Color(255, 153, 102)));
-        jButton3.setFocusTraversalPolicyProvider(true);
-        jButton3.setMargin(new java.awt.Insets(2, 89, 2, 14));
-        jButton3.setMinimumSize(new java.awt.Dimension(70, 89));
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        btnAgregar.setFont(new java.awt.Font("Lucida Sans", 1, 14)); // NOI18N
+        btnAgregar.setForeground(new java.awt.Color(0, 102, 102));
+        btnAgregar.setText("Agregar");
+        btnAgregar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 204, 102), new java.awt.Color(255, 102, 51), new java.awt.Color(250, 165, 108), new java.awt.Color(255, 153, 102)));
+        btnAgregar.setFocusTraversalPolicyProvider(true);
+        btnAgregar.setMargin(new java.awt.Insets(2, 89, 2, 14));
+        btnAgregar.setMinimumSize(new java.awt.Dimension(70, 89));
+        btnAgregar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                btnAgregarActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 410, 100, 30));
 
-        jButton4.setFont(new java.awt.Font("Lucida Sans", 1, 14)); // NOI18N
-        jButton4.setForeground(new java.awt.Color(0, 102, 102));
-        jButton4.setText("Modificar");
-        jButton4.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 204, 102), new java.awt.Color(255, 102, 51), new java.awt.Color(250, 165, 108), new java.awt.Color(255, 153, 102)));
-        jButton4.setFocusTraversalPolicyProvider(true);
-        jButton4.setMargin(new java.awt.Insets(2, 89, 2, 14));
-        jButton4.setMinimumSize(new java.awt.Dimension(70, 89));
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        btnModificar.setFont(new java.awt.Font("Lucida Sans", 1, 14)); // NOI18N
+        btnModificar.setForeground(new java.awt.Color(0, 102, 102));
+        btnModificar.setText("Modificar");
+        btnModificar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 204, 102), new java.awt.Color(255, 102, 51), new java.awt.Color(250, 165, 108), new java.awt.Color(255, 153, 102)));
+        btnModificar.setFocusTraversalPolicyProvider(true);
+        btnModificar.setMargin(new java.awt.Insets(2, 89, 2, 14));
+        btnModificar.setMinimumSize(new java.awt.Dimension(70, 89));
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                btnModificarActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 410, 100, 30));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(100, 100, 100)
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(240, 240, 240)
+                .addComponent(jLabel1))
+            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(60, 60, 60)
+                .addComponent(btnAgregar, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(btnModificar, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(60, 60, 60)
+                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnAgregar, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnModificar, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
 
         jMenuBar1.setBackground(new java.awt.Color(0, 51, 51));
         jMenuBar1.setFont(new java.awt.Font("Lucida Sans", 1, 12)); // NOI18N
@@ -255,24 +298,24 @@ public class Dashboard extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 491, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        new ModificarProceso().setVisible(true);
+    }//GEN-LAST:event_btnModificarActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void btnCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarArchivoActionPerformed
+        cargarProcesosArchivo();
+    }//GEN-LAST:event_btnCargarArchivoActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton3ActionPerformed
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        new AgregarProceso().setVisible(true);
+    }//GEN-LAST:event_btnAgregarActionPerformed
 
     private void dashboardMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashboardMenuActionPerformed
 
@@ -287,6 +330,16 @@ public class Dashboard extends javax.swing.JFrame {
         this.setVisible(false);
         new Estadisticas().setVisible(true);
     }//GEN-LAST:event_estadisticasMenuActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+    scheduler = Scheduler.GetInstance();
+        Hardware hardware = Hardware.getInstance();
+        scheduler.BindHardware(hardware);
+        scheduler.Start();
+        inicializarProcesosIniciales();
+        cargarTablas();
+        final DashboardUpdate dashboardUpdate = new DashboardUpdate(this);
+        executor.scheduleAtFixedRate(dashboardUpdate, 1000, 1000, TimeUnit.MILLISECONDS);    }//GEN-LAST:event_formWindowOpened
 
     /**
      * @param args the command line arguments
@@ -325,14 +378,114 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
     }
+    
+    private static void inicializarProcesosIniciales() {
+        Program p1 = new Program("System", 0, 50, 10, 13);
+        Program p2 = new Program("Secure System", 0, 100, 20, 20);
+        Program p3 = new Program("Registry", 0, 20, 5, 10);
+        scheduler.RunProgram(p1, 1, 0);
+        scheduler.RunProgram(p2, 1, 0);
+        scheduler.RunProgram(p3, 1, 0);
+    }
+
+    public void cargarTablas() {
+        cargarTablaProcesos();
+        cargarTablaNucleos();
+    }
+    
+    private void setearModeloTablaNucelos() {
+        modeloNucleos = new DefaultTableModel();
+        setearEstilo(tablaNucleos);
+        modeloNucleos.addColumn("ID Nucleo");
+        modeloNucleos.addColumn("Proceso");
+
+        this.tablaNucleos.setModel(modeloNucleos);
+    }
+
+    private void setearModeloTablaProcesos() {
+        modeloProcesos = new DefaultTableModel();
+        setearEstilo(tablaProcesos);
+        modeloProcesos.addColumn("ID");
+        modeloProcesos.addColumn("Nombre");
+        modeloProcesos.addColumn("Estado");
+        modeloProcesos.addColumn("Prioridad");
+
+        //modeloProcesos.addColumn("RAM (MB)");
+        this.tablaProcesos.setModel(modeloProcesos);
+    }
+    
+    private void setearEstilo(JTable pTalba)
+    {
+        pTalba.getTableHeader().setFont(new Font("Lucida Sans",Font.BOLD,14));
+        pTalba.getTableHeader().setOpaque(false);
+        pTalba.getTableHeader().setBackground(Color.black);
+        pTalba.getTableHeader().setForeground(new Color(0,51,51));
+        UIManager.put("nimbusBlueGrey", new Color(215,235,235));
+    }
+    
+    private void cargarProcesosArchivo() {
+        String[] lineas = ManejadorArchivosGenerico.leerArchivo("src/procesos.txt");
+        for (int i = 1; i < lineas.length; i++) //La linea 0 tiene la estructura a seguir
+        {
+            String[] partesProceso = lineas[i].split(",");
+            Program prog = new Program(partesProceso[0], Integer.valueOf(partesProceso[1]), Integer.valueOf(partesProceso[2]), Integer.valueOf(partesProceso[3]), Integer.valueOf(partesProceso[4]));
+            scheduler.RunProgram(prog, Integer.valueOf(partesProceso[5]), Integer.valueOf(partesProceso[6]));
+        }
+    }
+    
+     private void cargarTablaNucleos() {
+        vaciarTablaNucleos();
+        String[] texto = new String[2];
+        Core[] nucleos = scheduler.getCores();
+        for (Core nucleo : nucleos) {
+            texto[0] = String.valueOf(nucleo.getCoreId());
+            if (nucleo.getRunningPCB() == null) {
+                texto[1] = "vacio";
+            } else {
+                texto[1] = String.valueOf(nucleo.getRunningPCB().Program.Name);
+            }
+            modeloNucleos.addRow(texto);
+        }
+        modeloNucleos.fireTableDataChanged();
+    }
+
+     private void vaciarTablaNucleos() {
+        for (int i = 0; i < tablaNucleos.getRowCount(); i++) {
+            modeloNucleos.removeRow(i);
+            i -= 1;
+        }
+    }
+
+    private void cargarTablaProcesos() {
+        vaciarTablaProcesos();
+        String[] texto = new String[4];
+        LinkedList<ProcessDetail> procesos = scheduler.GetAllProcesses();
+        //LinkedList<PCB> procesos =scheduler.GetProcesses(); 
+        for (ProcessDetail p : procesos) {
+            texto[0] = String.valueOf(p.PID);
+            texto[1] = String.valueOf(p.Name);
+            texto[2] = String.valueOf(p.State);
+            texto[3] = String.valueOf(p.Priority);
+            //texto[4] = String.valueOf(p.getRAM());
+            modeloProcesos.addRow(texto);
+        }
+        modeloProcesos.fireTableDataChanged();
+    }
+
+    private void vaciarTablaProcesos() {
+        for (int i = 0; i < tablaProcesos.getRowCount(); i++) {
+            modeloProcesos.removeRow(i);
+            i -= 1;
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAgregar;
+    private javax.swing.JButton btnCargarArchivo;
+    private javax.swing.JButton btnModificar;
     private javax.swing.JMenu dashboardMenu;
     private javax.swing.JMenu estadisticasMenu;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JMenuBar jMenuBar1;
@@ -341,7 +494,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable tabla1;
-    private javax.swing.JTable tabla2;
+    private javax.swing.JTable tablaNucleos;
+    private javax.swing.JTable tablaProcesos;
     // End of variables declaration//GEN-END:variables
 }

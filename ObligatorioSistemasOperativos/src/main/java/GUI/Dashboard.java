@@ -30,12 +30,7 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         initComponents();
         setearModeloTablaNucelos();
-        setearModeloTablaProcesos();
-        tablaProcesos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaProcesos.getTableHeader().setOpaque(false);
-        tablaProcesos.getTableHeader().setBackground(new Color(32,136,203));
-        tablaProcesos.getTableHeader().setForeground(new Color(0,0,0));
-        
+        setearModeloTablaProcesos();       
     }
     
 
