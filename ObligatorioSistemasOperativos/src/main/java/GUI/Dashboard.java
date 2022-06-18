@@ -5,10 +5,11 @@
 package GUI;
 
 import com.mycompany.obligatoriosistemasoperativos.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.util.LinkedList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import javax.swing.table.DefaultTableModel;
 
@@ -30,7 +31,13 @@ public class Dashboard extends javax.swing.JFrame {
         initComponents();
         setearModeloTablaNucelos();
         setearModeloTablaProcesos();
+        tablaProcesos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tablaProcesos.getTableHeader().setOpaque(false);
+        tablaProcesos.getTableHeader().setBackground(new Color(32,136,203));
+        tablaProcesos.getTableHeader().setForeground(new Color(0,0,0));
+        
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -50,7 +57,6 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         btnAgregar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
-        btnRefresh = new javax.swing.JButton();
         btnCargarArchivo = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         dashboardMenu = new javax.swing.JMenu();
@@ -59,6 +65,7 @@ public class Dashboard extends javax.swing.JFrame {
         jMenu1.setText("jMenu1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(250, 0, 0));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowActivated(java.awt.event.WindowEvent evt) {
                 formWindowActivated(evt);
@@ -89,6 +96,11 @@ public class Dashboard extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tablaProcesos.setRowHeight(25);
+        tablaProcesos.setSelectionBackground(new java.awt.Color(255, 0, 0));
+        tablaProcesos.setSelectionForeground(new java.awt.Color(255, 255, 255));
+        tablaProcesos.setShowVerticalLines(true);
+        tablaProcesos.getTableHeader().setReorderingAllowed(false);
         jScrollPane2.setViewportView(tablaProcesos);
 
         jLabel2.setText("Procesos");
@@ -106,13 +118,6 @@ public class Dashboard extends javax.swing.JFrame {
         btnModificar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnModificarActionPerformed(evt);
-            }
-        });
-
-        btnRefresh.setText("Refresh");
-        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnRefreshActionPerformed(evt);
             }
         });
 
@@ -156,10 +161,8 @@ public class Dashboard extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 99, Short.MAX_VALUE)
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -187,8 +190,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnRefresh))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAgregar)
@@ -219,10 +221,6 @@ public class Dashboard extends javax.swing.JFrame {
         final DashboardUpdate dashboardUpdate = new DashboardUpdate(this);
         executor.scheduleAtFixedRate(dashboardUpdate, 1000, 1000, TimeUnit.MILLISECONDS);
     }//GEN-LAST:event_formWindowOpened
-
-    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
-        cargarTablas();
-    }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         new ModificarProceso().setVisible(true);
@@ -376,7 +374,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnAgregar;
     private javax.swing.JButton btnCargarArchivo;
     private javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnRefresh;
     private javax.swing.JMenu dashboardMenu;
     private javax.swing.JMenu estadisticasMenu;
     private javax.swing.JLabel jLabel2;
