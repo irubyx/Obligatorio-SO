@@ -117,4 +117,4 @@ Si se desea modificar un proceso que fue agregado previamente al sistema, se ha 
 ![]()
 
 Una vez modificados los campos del proceso, se debe dar click en el botón de `Guardar cambios` para guardar y modificar los datos del proceso seleccionado.\
-Opcionalmente, existe la posibilidad de volver a la pestaña de `Dashboard`, para ello se ha de dar click en el botón de `Atrás`.
+Opcionalmente, existe la posibilidad de volver a la pestaña de `Dashboard`, para ello se ha de dar click en el botón de `Atrás`. :octocat:
