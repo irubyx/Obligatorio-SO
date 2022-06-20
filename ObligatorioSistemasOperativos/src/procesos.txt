@@ -1,3 +1,0 @@
-Nombre,TiempoRequerido,TiempoEntreE/S,TiempoSalirE/S,TamañoMemoria,Prioridad,IdPadre
-Prueba1,0,500,500,25,20,2
-Prueba2,100000,500,500,15,18,0

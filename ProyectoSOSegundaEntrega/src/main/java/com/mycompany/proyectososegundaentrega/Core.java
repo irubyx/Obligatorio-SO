@@ -2,7 +2,6 @@ package com.mycompany.proyectososegundaentrega;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 public class Core {
 
     final int CoreID;
